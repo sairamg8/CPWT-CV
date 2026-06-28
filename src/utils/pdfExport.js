@@ -135,6 +135,36 @@ export function exportToPDF(elementId, filename = 'resume.pdf', pageMargin = '14
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
           color-adjust: exact !important;
+          /* Strip decorative CSS that adds noise or bloat in PDF */
+          box-shadow: none !important;
+          text-shadow: none !important;
+          transition: none !important;
+          animation: none !important;
+        }
+
+        /* ATS COMPATIBILITY — use system fonts so Chrome's PDF engine writes
+           standard glyph-to-Unicode mappings. Subsetted Google Fonts (e.g. Noto Sans)
+           cause misreads in Workday: "WoW" → "Work", "Natwest" → "Netverst".
+           System fonts (Arial/Helvetica) are never embedded — they are referenced by
+           name, which also dramatically reduces PDF file size (~500KB → ~50KB). */
+        #__cpwtcv_print_portal__ * {
+          font-family: Arial, Helvetica, 'Liberation Sans', sans-serif !important;
+        }
+
+        /* ATS COMPATIBILITY — strip bold from rich-text content inside descriptions.
+           Bold <strong>/<b> project sub-headers look like entry-level markers to ATS
+           parsers, causing them to lose the actual company name for that entry.
+           (e.g. LTIMindtree, Crossdev, Indegene company names went missing in Workday) */
+        #__cpwtcv_print_portal__ .rich-text-output strong,
+        #__cpwtcv_print_portal__ .rich-text-output b {
+          font-weight: normal !important;
+        }
+
+        /* ATS COMPATIBILITY — hide SVG icons (contact info icons, brand icons).
+           ATS parsers read SVG path data as gibberish text, polluting parsed output.
+           The text labels remain fully readable without the icons. */
+        #__cpwtcv_print_portal__ svg {
+          display: none !important;
         }
       }
     `;

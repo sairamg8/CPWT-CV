@@ -11,7 +11,7 @@ import {
 } from '@/utils/defaultData';
 
 const STORAGE_KEY = 'cpwtcv_v1';
-const DATA_VERSION = 5;
+const DATA_VERSION = 6;
 
 const TEMPLATE_DEFAULTS = [
   defaultResumeData,
