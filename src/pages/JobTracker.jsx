@@ -9,6 +9,7 @@ import { useAppStore } from '@/hooks/useResumeStore';
 import { JOB_STATUSES } from '@/constants/jobs';
 import { KanbanView } from '@/components/job/KanbanView';
 import { ListView } from '@/components/job/ListView';
+import { CareerHistoryPanel } from '@/components/CareerHistoryPanel';
 
 export function JobTracker() {
   const navigate = useNavigate();
@@ -47,8 +48,7 @@ export function JobTracker() {
   }
 
   function handleFilterStatus(id) {
-    const next = filterStatus === id ? '' : id;
-    setFilterStatus(next);
+    setFilterStatus(prev => prev === id ? '' : id);
   }
 
   const filteredJobs = jobs.filter(j => {
@@ -62,14 +62,15 @@ export function JobTracker() {
   const withdrawnCount = jobs.filter(j => j.status === 'withdrawn').length;
 
   const stats = [
-    { label: 'Total',      value: jobs.length,                                                                           color: 'text-gray-900' },
+    { label: 'Total',      value: jobs.length,                                                                                color: 'text-gray-900' },
     { label: 'Active',     value: jobs.filter(j => !['rejected', 'withdrawn', 'offer', 'on_hold'].includes(j.status)).length, color: 'text-blue-600' },
-    { label: 'Interviews', value: jobs.filter(j => ['phone_screen', 'interview'].includes(j.status)).length,             color: 'text-amber-600' },
-    { label: 'Offers',     value: jobs.filter(j => j.status === 'offer').length,                                         color: 'text-green-600' },
+    { label: 'Interviews', value: jobs.filter(j => ['phone_screen', 'interview'].includes(j.status)).length,                  color: 'text-amber-600' },
+    { label: 'Offers',     value: jobs.filter(j => j.status === 'offer').length,                                              color: 'text-green-600' },
   ];
 
   return (
     <div className="min-h-screen bg-[#f5f3ef]">
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3">
@@ -126,7 +127,6 @@ export function JobTracker() {
             >
               <Eraser size={13} /> Clear
             </button>
-
             <button
               onClick={() => navigate('/jobs/new')}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
@@ -221,26 +221,40 @@ export function JobTracker() {
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        {view === 'kanban' ? (
-          <KanbanView
-            jobs={filteredJobs}
-            updateJob={updateJob}
-            onNavigate={id => navigate(`/jobs/${id}`)}
-            onDelete={deleteJob}
-            scrollToStatus={filterStatus}
-          />
-        ) : (
-          <ListView
-            jobs={filteredJobs}
-            resumes={resumes}
-            onNavigate={id => navigate(`/jobs/${id}`)}
-            onDelete={deleteJob}
-          />
-        )}
-      </div>
+      {/* Main content — sidebar + board */}
+      <div className="max-w-7xl mx-auto px-6 py-6 flex gap-6 items-start">
 
+        {/* Left sidebar — career history */}
+        <div className="w-64 shrink-0 sticky top-6">
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Career History</p>
+          <CareerHistoryPanel
+            resumes={resumes}
+            activeId={appState.activeId}
+            showJobTrackerLink={false}
+          />
+        </div>
+
+        {/* Right — kanban / list */}
+        <div className="flex-1 min-w-0 overflow-hidden">
+          {view === 'kanban' ? (
+            <KanbanView
+              jobs={filteredJobs}
+              updateJob={updateJob}
+              onNavigate={id => navigate(`/jobs/${id}`)}
+              onDelete={deleteJob}
+              scrollToStatus={filterStatus}
+            />
+          ) : (
+            <ListView
+              jobs={filteredJobs}
+              resumes={resumes}
+              onNavigate={id => navigate(`/jobs/${id}`)}
+              onDelete={deleteJob}
+            />
+          )}
+        </div>
+
+      </div>
     </div>
   );
 }

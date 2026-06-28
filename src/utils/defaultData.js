@@ -1,6 +1,6 @@
 // ATS-safe defaults — proper dimensions, neutral colors, standard font
 export const ATS_DEFAULTS = {
-  font: 'inter',
+  font: 'notosans',
   fontSize: 'normal',
   fontSizeBase: 11,
   fontSizeNameDelta: 8,
@@ -9,7 +9,7 @@ export const ATS_DEFAULTS = {
   lineHeight: 'normal',
   margins: 'normal',
   accentColor: '#374151',
-  textColor: '#1a1a1a',
+  textColor: '#111111',
   headingStyle: 'ruled',
   sectionTitleCase: 'upper',
   sectionBorderWidth: 1,
@@ -34,515 +34,304 @@ export const ATS_DEFAULTS = {
   itemGap: 12,
   marginH: 18,
   marginV: 14,
-  // Template-specific background colors
   sidebarBg: '#1e293b',
-  // Header / named-element color overrides (empty = use template default)
   headerTextColor: '#ffffff',
   nameColor: '',
   jobTitleColor: '',
 };
 
-// ─── Sairam Gudiputi — Real Resume Data ──────────────────────────────────────
-export const defaultResumeData = {
-  id: 'resume_default',
+// ── Shared resume content ─────────────────────────────────────────────────────
+
+const SAIRAM_PERSONAL = {
   name: 'Sairam Gudiputi',
-  updatedAt: Date.now(),
-  template: 'classic',
-  settings: { ...ATS_DEFAULTS, accentColor: '#1a1a1a' },
-  personal: {
-    name: 'Sairam Gudiputi',
-    title: 'Senior Frontend Developer',
-    email: 'sairamgudiputi8@gmail.com',
-    phone: '+91 8519819953',
-    location: 'Hyderabad, India',
-    website: 'sairamg.dev',
-    websiteLabel: 'Portfolio',
-    websiteUrl: 'https://sairamg.dev',
-    linkedin: 'linkedin.com/in/sairamg8',
-    linkedinLabel: 'LinkedIn',
-    linkedinUrl: 'https://linkedin.com/in/sairamg8',
-    github: 'github.com/sairamgudiputi',
-    githubLabel: 'GitHub',
-    githubUrl: 'https://github.com/sairamgudiputi',
-    summary:
-      'Senior Frontend Developer with 7+ years of experience building scalable, high-performance web applications using React, Next.js, and TypeScript. Proven track record delivering accessible, performant user interfaces across fintech, healthcare, and e-commerce domains — improving load times by up to 70% and mentoring engineering teams. Skilled in modern state management, CI/CD, automated testing, and design systems.',
-    photo: null,
-    hiddenFields: [],
-  },
-  sections: [
-    {
-      id: 'skills',
-      type: 'skills',
-      title: 'Skills',
-      settings: {
-        spacing: 'normal',
-        columns: 1,
-        skillsStyle: 'inline',
-        separator: 'colon',
-        titleStyle: 'inline',
-      },
-      items: [
-        { id: 'sk1', category: 'Frontend Development', skills: 'JavaScript (ES6+), TypeScript, React.js, Next.js 14/15, HTML5, CSS3', description: '', bullets: [] },
-        { id: 'sk2', category: 'Backend Development', skills: 'Node.js, Express.js, RESTful APIs, JWT, RBAC (Role-Based Access Control)', description: '', bullets: [] },
-        { id: 'sk3', category: 'Development Tools', skills: 'Webpack, Vite, Babel, ESLint, Git, NPM/Yarn', description: '', bullets: [] },
-        { id: 'sk4', category: 'Testing & Quality', skills: 'Jest, React Testing Library (RTL), Cypress, Unit Testing', description: '', bullets: [] },
-        { id: 'sk5', category: 'UI/UX Libraries', skills: 'Material UI, TailwindCSS, Bootstrap, Chart.js, Ant Design, Shadcn', description: '', bullets: [] },
-        { id: 'sk6', category: 'Methodologies', skills: 'Agile/Scrum, CI/CD, Modular Architecture, State Management (Context API, Redux Toolkit)', description: '', bullets: [] },
-      ],
-    },
-    {
-      id: 'experience',
-      type: 'experience',
-      title: 'Experience',
-      settings: {
-        spacing: 'normal',
-        columns: 1,
-        showDates: true,
-        showLocation: true,
-        titleStyle: 'stacked',
-      },
-      items: [
-        {
-          id: 'exp1',
-          company: 'LTIMindtree',
-          role: 'Software Engineer',
-          location: 'Hyderabad, India',
-          startDate: '09/2024',
-          endDate: '',
-          current: true,
-          description: '<p><strong>RFP Internal AI Tool – Healthcare</strong></p><ul><li>Led architecture and end-to-end development of an AI-powered RFP management tool modeled after RFPIO and Loopio, tailored for Philips (healthcare domain)</li><li>Mentored two junior developers on React best practices and code review processes</li><li>Built a recursive section/subsection system with seamless drag-and-drop using Dnd Kit to manage complex RFP structures</li><li>Optimized frontend performance with deep memoization, API batching, and intelligent caching, reducing load times by 70%</li><li>Built high-performance virtualized lists with TanStack Virtualization handling 10,000+ rows</li><li>Implemented CI/CD pipeline saving 20% deployment time</li></ul><p><em>Tech: React 18, Filament, Context API, React Hook Form, YUP, Redux Toolkit, GitHub CI/CD</em></p><p><strong>Contentful Experience Website</strong></p><ul><li>Led frontend revamp of healthcare content platform achieving 40% faster load times with Next.js and Contentful CMS</li><li>Resolved critical performance bottlenecks with code splitting, lazy loading, and intelligent caching</li><li>Improved stability and Core Web Vitals through SSR and advanced caching strategies</li></ul><p><em>Tech: Next.js 14, React 18, Vanilla Extract CSS, Context API</em></p>',
-          bullets: [],
-        },
-        {
-          id: 'exp2',
-          company: 'Gloify',
-          role: 'Software Engineer',
-          location: 'Hyderabad, India',
-          startDate: '06/2023',
-          endDate: '08/2024',
-          current: false,
-          description: '<p><strong>FinEase – Stock Market Trading Platform</strong></p><ul><li>Designed and implemented a brokerage platform using a scalable Next.js architecture with SSR, improving SEO and feature velocity</li><li>Engineered dynamic data visualizations with Chart.js, optimized with memoization and lazy loading for high-volume stock data</li><li>Defined modular Redux Toolkit state management patterns, accelerating feature development and maintainability</li></ul><p><em>Tech: Next.js, React 18, Material UI, Chart.js, SASS, Redux, CSS Modules</em></p><p><strong>Paywize – B2B FinTech Platform</strong></p><ul><li>Architected secure B2B payment platform with scalable architecture for financial transactions between merchants and distributors</li><li>Implemented JWT authentication and RBAC with multiple payment channels including UPI QR, Virtual Accounts, and Wallet transfers</li><li>Optimized APIs and frontend rendering to handle 1,000+ concurrent users with &lt;500ms response times</li></ul><p><em>Tech: React 18, Node.js, Express, Redux Toolkit, Material UI, YUP, React Hook Form</em></p>',
-          bullets: [],
-        },
-        {
-          id: 'exp3',
-          company: 'TATA Consultancy Services',
-          role: 'System Engineer',
-          location: 'Hyderabad, India',
-          startDate: '02/2023',
-          endDate: '06/2023',
-          current: false,
-          description: '<p><strong>Ingram Micro – E-commerce Platform</strong></p><ul><li>Modernized legacy frontend architecture for a high-traffic e-commerce platform, reducing load time by 25% and improving UX under high concurrency</li><li>Optimized complex forms and state management using Zustand and Context API for bulk order processing</li></ul><p><em>Tech: React 17, Context API, Bootstrap, Ant Design, CSS-in-JS</em></p>',
-          bullets: [],
-        },
-        {
-          id: 'exp4',
-          company: 'Indegene Pvt Ltd',
-          role: 'Junior Software Engineer',
-          location: 'Hyderabad, India',
-          startDate: '10/2020',
-          endDate: '02/2023',
-          current: false,
-          description: '<p><strong>Pfizer Projects – Healthcare Communication</strong></p><ul><li>Developed responsive healthcare applications and email templates using React, Bootstrap, and Veeva Vault for Pfizer initiatives</li><li>Delivered internal tools and static sites used for communication campaigns, improving efficiency for pharmaceutical reps</li><li>Recognized with "Best Sprinter" award three times for consistent, high-quality delivery under tight deadlines</li></ul><p><em>Tech: React.js, Bootstrap, Tailwind CSS, Veeva Vault, Salesforce</em></p><p><strong>Software Pundits (Contract @ Indegene)</strong></p><ul><li>Contributed to healthcare-based static sites and email template designs, building for multi-device compatibility</li></ul>',
-          bullets: [],
-        },
-        {
-          id: 'exp5',
-          company: 'DigitalKnock India Pvt Ltd',
-          role: 'Web Developer',
-          location: 'Hyderabad, India',
-          startDate: '01/2019',
-          endDate: '10/2020',
-          current: false,
-          description: '<p>Architected 20+ client-facing static websites from scratch using HTML, CSS, and JavaScript. Converted static sites into CMS-backed applications using PHP and MySQL. Ensured responsive design, cross-browser support, and performance optimization across devices.</p><p><em>Tech: HTML, CSS, JavaScript, Bootstrap, PHP, MySQL, Tailwind CSS</em></p>',
-          bullets: [],
-        },
-      ],
-    },
-    {
-      id: 'projects',
-      type: 'projects',
-      title: 'Projects',
-      settings: { spacing: 'normal', columns: 1, showDates: true, titleStyle: 'stacked' },
-      items: [
-        {
-          id: 'proj1',
-          name: 'CPWT-CV — Resume Builder',
-          url: 'https://github.com/sairamgudiputi/flowcv',
-          technologies: 'React 19, Vite, Tailwind CSS v4, Firebase, dnd-kit',
-          startDate: '05/2025',
-          endDate: '',
-          description: '<ul><li>Built a full-featured resume builder with 5 templates, live A4 paginated preview, PDF/Word export, and Firebase cloud sync</li><li>Implemented smart leaf-level page-break algorithm for pixel-perfect PDF output across all templates</li><li>Designed a Job Tracker module with Kanban/list views, drag-and-drop pipeline stages, tasks, and rich-text notes</li></ul>',
-          bullets: [],
-        },
-        {
-          id: 'proj2',
-          name: 'FinEase Trading Dashboard',
-          url: '',
-          technologies: 'Next.js, Chart.js, Redux Toolkit, Material UI',
-          startDate: '08/2023',
-          endDate: '08/2024',
-          description: '<ul><li>Delivered a real-time stock market trading UI with live charting, portfolio analytics, and order management for 10,000+ active users</li></ul>',
-          bullets: [],
-        },
-      ],
-    },
-    {
-      id: 'certifications',
-      type: 'certifications',
-      title: 'Certificates',
-      settings: { spacing: 'normal', showDates: true },
-      items: [
-        { id: 'cert1', name: 'JavaScript Algorithms & Data Structures', issuer: 'Udemy', date: '2022', expiry: '', credentialId: '', url: '' },
-        { id: 'cert2', name: 'Node.js Developer Course', issuer: 'Udemy', date: '2021', expiry: '', credentialId: '', url: '' },
-        { id: 'cert3', name: 'React — The Complete Guide', issuer: 'Udemy', date: '2020', expiry: '', credentialId: '', url: '' },
-      ],
-    },
-    {
-      id: 'awards',
-      type: 'awards',
-      title: 'Awards & Recognition',
-      settings: { spacing: 'normal', showDates: true },
-      items: [
-        { id: 'awd1', title: 'Best Sprinter Award (×3)', issuer: 'Indegene Pvt Ltd', date: '2021–2022', description: 'Awarded three times for consistent, high-quality sprint delivery under tight deadlines across Pfizer healthcare projects.' },
-      ],
-    },
-    {
-      id: 'languages',
-      type: 'languages',
-      title: 'Languages',
-      settings: { spacing: 'normal', columns: 2 },
-      items: [
-        { id: 'lang1', language: 'English', proficiency: 'Professional' },
-        { id: 'lang2', language: 'Telugu', proficiency: 'Native' },
-        { id: 'lang3', language: 'Hindi', proficiency: 'Professional' },
-      ],
-    },
-    {
-      id: 'education',
-      type: 'education',
-      title: 'Education',
-      settings: {
-        spacing: 'normal',
-        columns: 1,
-        showDates: true,
-        showLocation: false,
-        titleStyle: 'stacked',
-      },
-      items: [
-        {
-          id: 'edu1',
-          institution: 'Jawaharlal Nehru Technological University',
-          degree: 'B.Tech — Pharmaceutical Engineering',
-          fieldOfStudy: '',
-          location: 'Hyderabad, India',
-          startDate: '05/2014',
-          endDate: '06/2018',
-          gpa: '',
-          description: '',
-          bullets: [],
-        },
-      ],
-    },
-  ],
-  coverLetter: {
-    recipientName: 'Hiring Manager',
-    recipientTitle: '',
-    company: '',
-    date: '',
-    subject: 'Application for Senior Frontend Developer Role',
-    body: '<p>I am writing to express my strong interest in the Senior Frontend Developer position. With over 7 years of hands-on experience building high-performance, scalable web applications using React, Next.js, and TypeScript, I am confident in my ability to make an immediate and meaningful contribution to your engineering team.</p><p>Throughout my career at LTIMindtree, Gloify, and Indegene, I have consistently delivered results that matter — from cutting page load times by 70% through aggressive caching and virtualization strategies, to architecting a fintech platform that handles 1,000+ concurrent users with sub-500ms response times. I thrive at the intersection of technical depth and user empathy, ensuring that every interface I ship is both performant and a delight to use.</p><p>I am particularly drawn to your organization because of its commitment to innovation and engineering excellence. I look forward to bringing my expertise in React ecosystems, CI/CD practices, and cross-functional collaboration to your team.</p><p>Thank you for considering my application. I would welcome the opportunity to discuss how my background aligns with your needs.</p>',
-    closing: 'Sincerely',
-    signatureName: 'Sairam Gudiputi',
-    signatureDesignation: 'Senior Frontend Developer',
-    signatureSpace: true,
-  },
+  title: 'UI Software Engineer',
+  email: 'sairamgudiputi8@gmail.com',
+  phone: '+91 8519819953',
+  location: 'Bangalore, India',
+  website: 'sairamg.dev',
+  linkedin: 'linkedin.com/in/sairamg8',
+  github: '',
+  summary:
+    'Product-focused UI Software Engineer with 7+ years of experience delivering high-performance web applications across fintech, healthcare, and e-commerce — working with clients including Natwest Group, Philips, Pfizer, and Ingram Micro. Proven at architecting scalable React and Next.js frontends that improve Core Web Vitals, reduce load times, and handle thousands of concurrent users. Deep expertise in TypeScript, performance engineering, accessibility, and leading cross-functional delivery under Agile frameworks.',
+  photo: null,
+  hiddenFields: ['github'],
 };
 
-// ─── Maya Chen — Fictional Demo Resume (exercises every section type & feature) ─
-export const dummyResumeData = {
-  id: 'resume_dummy',
-  name: 'Maya Chen — Demo Resume',
+const SAIRAM_SECTIONS = [
+  {
+    id: 'skills',
+    type: 'skills',
+    title: 'Skills',
+    settings: {
+      spacing: 'normal',
+      columns: 1,
+      skillsStyle: 'inline',
+      separator: 'colon',
+      titleStyle: 'inline',
+    },
+    items: [
+      { id: 'sk1', category: 'Core Tech', skills: 'React, Next.js (14/15), TypeScript, JavaScript (ES6+), Node.js, Express.js, MongoDB, PostgreSQL', description: '', bullets: [] },
+      { id: 'sk2', category: 'UI/UX & Styling', skills: 'Material UI, TailwindCSS, Framer Motion, Vanilla Extract CSS, Bootstrap, Ant Design, Shadcn, SASS', description: '', bullets: [] },
+      { id: 'sk3', category: 'Performance', skills: 'Code Splitting, SSR/ISR, Lazy Loading, Bundle Optimization, API Batching, TanStack Virtual, Memoization', description: '', bullets: [] },
+      { id: 'sk4', category: 'Dev Tools & Infra', skills: 'Webpack, Vite, Babel, ESLint, Git, GitHub CI/CD, NPM/Yarn, Veeva Vault, Salesforce', description: '', bullets: [] },
+      { id: 'sk5', category: 'Testing & Quality', skills: 'Jest, React Testing Library (RTL), Cypress, Unit Testing, Code Review', description: '', bullets: [] },
+      { id: 'sk6', category: 'Methodologies', skills: 'Agile/Scrum, CI/CD, Modular Architecture, Redux Toolkit, Context API, React Hook Form, YUP', description: '', bullets: [] },
+    ],
+  },
+  {
+    id: 'experience',
+    type: 'experience',
+    title: 'Experience',
+    settings: {
+      spacing: 'normal',
+      columns: 1,
+      showDates: true,
+      showLocation: true,
+      titleStyle: 'stacked',
+    },
+    items: [
+      {
+        id: 'exp0',
+        company: 'Natwest Group',
+        role: 'WoW Software Engineer',
+        location: 'Bangalore, India',
+        startDate: '11/2025',
+        endDate: '',
+        current: true,
+        description: '<ul><li>Refined the \'Make a Payment\' UX for Natwest\'s consumer banking platform by engineering fluid micro-transitions and real-time field validation, reducing payment form errors and delivering a high-trust, low-latency experience for millions of enterprise banking users</li><li>Collaborated with cross-functional squads following Natwest\'s Ways of Working (WoW) Agile framework — contributing to sprint planning, code reviews, and continuous delivery pipelines</li><li>Implemented accessible UI components adhering to WCAG 2.1 standards, ensuring full keyboard navigation and screen reader support across the critical payment journey</li></ul><p><em>Tech: React, TypeScript, TailwindCSS, Accessibility (A11y), CI/CD</em></p>',
+        bullets: [],
+      },
+      {
+        id: 'exp1',
+        company: 'LTIMindtree',
+        role: 'Software Engineer',
+        location: 'Bangalore, India',
+        startDate: '09/2024',
+        endDate: '11/2025',
+        current: false,
+        description: '<p><strong>RFP Internal AI Tool – Philips Healthcare</strong></p><ul><li>Led architecture and end-to-end development of an AI-powered RFP management platform for Philips, modeled after enterprise tools like RFPIO and Loopio — enabling healthcare teams to respond to RFPs faster through intelligent content reuse and smart suggestions</li><li>Designed a recursive section/subsection system with seamless drag-and-drop reordering using Dnd Kit, allowing users to manage deeply nested RFP document structures like a file system</li><li>Optimized frontend performance via deep memoization, API batching, and intelligent caching, achieving a 70% improvement in perceived responsiveness and eliminating bottlenecks during peak usage</li><li>Built high-performance virtualized lists with TanStack Virtualization to smoothly render audit trail datasets exceeding 10,000 rows across all devices</li><li>Mentored two junior developers on React architecture, component design patterns, and pull request best practices</li><li>Implemented CI/CD pipelines that cut deployment time by 20% and improved release cadence</li></ul><p><em>Tech: React 18, Filament (Internal Library), Context API, React Hook Form, YUP, Redux Toolkit, GitHub CI/CD</em></p><p><strong>Contentful Experience Website – Philips Healthcare CMS</strong></p><ul><li>Led the frontend revamp of Philips\' customer-facing healthcare content platform, architecting a Next.js 14 and Contentful CMS solution with performance-first principles — achieving 40% faster load times and measurably improved Core Web Vitals scores</li><li>Resolved critical performance bottlenecks by implementing advanced Next.js optimizations including code splitting, lazy loading, and intelligent ISR caching strategies</li><li>Drove SSR adoption and lazy loading patterns across the platform, delivering a more stable and faster experience for healthcare content consumers</li></ul><p><em>Tech: Next.js 14, React 18, Vanilla Extract CSS, Context API, Contentful CMS</em></p>',
+        bullets: [],
+      },
+      {
+        id: 'exp2',
+        company: 'Crossdev Technologies',
+        role: 'Software Engineer',
+        location: 'Bangalore, India',
+        startDate: '06/2023',
+        endDate: '08/2024',
+        current: false,
+        description: '<p><strong>Paywize – B2B Payment Ecosystem</strong></p><ul><li>Architected a secure B2B payment platform facilitating financial transactions between merchants and distributors across UPI QR, Virtual Accounts, and Wallet transfer channels</li><li>Built a robust security framework using JWT authentication and Role-Based Access Control (RBAC) to enforce multi-tier access policies and protect sensitive financial data</li><li>Optimized API response patterns and database schemas to sustain 1,000+ concurrent users with sub-500ms response times under production load</li></ul><p><em>Tech: React 18, Node.js, Express.js, PostgreSQL, Redux Toolkit, Material UI, YUP, React Hook Form</em></p><p><strong>FinEase – Stock Market Trading Platform</strong></p><ul><li>Designed and implemented a brokerage interface using Next.js SSR architecture, improving SEO visibility and accelerating feature delivery velocity across trading modules</li><li>Engineered real-time data visualizations with Chart.js, optimized with memoization and lazy loading to handle high-frequency stock data updates without UI degradation</li><li>Defined modular Redux Toolkit state management patterns adopted team-wide, reducing state-related bugs and improving long-term maintainability</li></ul><p><em>Tech: Next.js, React 18, Material UI, Chart.js, SASS, Redux Toolkit, CSS Modules</em></p>',
+        bullets: [],
+      },
+      {
+        id: 'exp3',
+        company: 'TATA Consultancy Services',
+        role: 'System Engineer',
+        location: 'Bangalore, India',
+        startDate: '02/2023',
+        endDate: '06/2023',
+        current: false,
+        description: '<p><strong>Ingram Micro – B2B E-commerce Platform</strong></p><ul><li>Modernized the legacy frontend architecture of Ingram Micro\'s high-traffic B2B e-commerce platform serving enterprise buyers globally — rebuilding product browsing and ordering workflows with React, reducing initial load time by 25%</li><li>Optimized multi-step bulk order forms and state management using Zustand and Context API, significantly improving form maintainability and user workflow efficiency under high concurrency</li></ul><p><em>Tech: React 17, Zustand, Context API, Bootstrap, Ant Design, CSS-in-JS</em></p>',
+        bullets: [],
+      },
+      {
+        id: 'exp4',
+        company: 'Indegene Pvt Ltd',
+        role: 'Junior Software Engineer',
+        location: 'Bangalore, India',
+        startDate: '10/2020',
+        endDate: '02/2023',
+        current: false,
+        description: '<p><strong>Pfizer Projects – Healthcare Communication</strong></p><ul><li>Developed responsive healthcare web applications and email templates for Pfizer\'s global communication campaigns using React, Bootstrap, and Veeva Vault — ensuring accessibility and multi-device compatibility for pharmaceutical reps and healthcare professionals</li><li>Built internal tools and campaign microsites used by Pfizer\'s marketing and medical affairs teams, improving operational efficiency and content delivery speed across initiatives</li><li>Recognized with the "Best Sprinter" award three consecutive times for consistent, high-quality delivery under tight sprint deadlines</li></ul><p><em>Tech: React.js, Bootstrap, Tailwind CSS, Veeva Vault, Salesforce</em></p><p><strong>Software Pundits (Contract @ Indegene)</strong></p><ul><li>Contributed to healthcare-based static site builds and responsive email template designs, ensuring cross-client email rendering consistency and multi-device compatibility</li></ul>',
+        bullets: [],
+      },
+      {
+        id: 'exp5',
+        company: 'DigitalKnock India Pvt Ltd',
+        role: 'Web Developer',
+        location: 'Bangalore, India',
+        startDate: '01/2019',
+        endDate: '10/2020',
+        current: false,
+        description: '<p>Designed and developed 20+ client-facing websites from scratch for SME clients across retail, real estate, and services sectors. Converted static sites into CMS-backed web applications using PHP and MySQL with admin panels enabling non-technical clients to manage their own content. Ensured responsive design, cross-browser compatibility, and performance optimization across all devices.</p><p><em>Tech: HTML5, CSS3, JavaScript, Bootstrap, PHP, MySQL, Tailwind CSS</em></p>',
+        bullets: [],
+      },
+    ],
+  },
+  {
+    id: 'certifications',
+    type: 'certifications',
+    title: 'Certificates',
+    settings: { spacing: 'normal', showDates: true, columns: 1 },
+    items: [
+      {
+        id: 'cert1',
+        name: 'JavaScript — The Complete Guide (ES6+)',
+        issuer: 'Udemy',
+        date: '',
+        expiry: '',
+        credentialId: '',
+        url: '',
+      },
+      {
+        id: 'cert2',
+        name: 'Node.js — The Complete Bootcamp',
+        issuer: 'Udemy',
+        date: '',
+        expiry: '',
+        credentialId: '',
+        url: '',
+      },
+    ],
+  },
+  {
+    id: 'education',
+    type: 'education',
+    title: 'Education',
+    settings: {
+      spacing: 'normal',
+      columns: 1,
+      showDates: true,
+      showLocation: false,
+      titleStyle: 'stacked',
+    },
+    items: [
+      {
+        id: 'edu1',
+        institution: 'Jawaharlal Nehru Technological University',
+        degree: 'B.Tech, Pharmaceutical Engineering',
+        fieldOfStudy: '',
+        location: 'Bangalore, India',
+        startDate: '05/2014',
+        endDate: '06/2018',
+        gpa: '',
+        description: '',
+        bullets: [],
+      },
+    ],
+  },
+];
+
+const BASE_COVER_LETTER = {
+  recipientName: '',
+  recipientTitle: 'Hiring Manager',
+  company: '',
+  date: '',
+  subject: '',
+  body: '',
+  closing: 'Sincerely',
+};
+
+// ── Classic Template — ATS-friendly, two-column header ────────────────────────
+
+export const defaultResumeData = {
+  id: 'resume_default',
+  name: 'Classic',
+  updatedAt: Date.now(),
+  template: 'classic',
+  settings: {
+    ...ATS_DEFAULTS,
+    accentColor: '#111111',
+    textColor: '#111111',
+    headingStyle: 'ruled',
+    headerAlign: 'left',
+  },
+  personal: SAIRAM_PERSONAL,
+  sections: SAIRAM_SECTIONS,
+  coverLetter: BASE_COVER_LETTER,
+};
+
+// ── Modern Template — Bold accent header, full-width ──────────────────────────
+
+export const defaultResumeDataModern = {
+  id: 'resume_modern',
+  name: 'Modern',
   updatedAt: Date.now(),
   template: 'modern',
   settings: {
     ...ATS_DEFAULTS,
-    accentColor: '#0f766e',
-    textColor: '#111827',
-    headingStyle: 'leftbar',
-    sectionTitleCase: 'upper',
-    font: 'inter',
-    fontSizeBase: 11,
+    accentColor: '#1d4ed8',
+    textColor: '#1a1a1a',
+    headingStyle: 'line',
     headerAlign: 'left',
-    contactStyle: 'icon',
-    sectionGap: 18,
-    itemGap: 12,
+    fontSizeNameDelta: 10,
+    sectionGap: 14,
+    itemGap: 10,
   },
-  personal: {
-    name: 'Maya Chen',
-    title: 'Senior Product Manager',
-    email: 'maya.chen@email.com',
-    phone: '+1 (415) 555-0192',
-    location: 'San Francisco, CA',
-    website: 'mayachen.io',
-    websiteLabel: 'Portfolio',
-    websiteUrl: 'https://mayachen.io',
-    linkedin: 'linkedin.com/in/mayachen',
-    linkedinLabel: 'LinkedIn',
-    linkedinUrl: 'https://linkedin.com/in/mayachen',
-    github: 'github.com/mayachen',
-    githubLabel: 'GitHub',
-    githubUrl: 'https://github.com/mayachen',
-    summary:
-      'Senior Product Manager with 8+ years driving 0-to-1 launches and scaling consumer products at Google, Meta, and Amazon. Shipped features adopted by 50M+ daily active users, generated $60M+ in incremental revenue, and led cross-functional teams of 15+ across engineering, design, and data science. Expert in data-driven roadmapping, rigorous A/B experimentation, and delivering in high-ambiguity environments.',
-    photo: null,
-    hiddenFields: [],
-  },
-  sections: [
-    // ── SKILLS ──────────────────────────────────────────────────────────────────
-    {
-      id: 's_skills',
-      type: 'skills',
-      title: 'Skills',
-      settings: { spacing: 'normal', columns: 1, skillsStyle: 'inline', separator: 'colon', titleStyle: 'inline' },
-      items: [
-        { id: 'sk1', category: 'Product Strategy', skills: 'Product Roadmapping, OKRs, Go-to-Market Strategy, Competitive Analysis, Vision & Positioning', description: '', bullets: [] },
-        { id: 'sk2', category: 'Data & Analytics', skills: 'SQL, Python (Pandas, NumPy), Google Analytics, Mixpanel, A/B Testing, Looker, Tableau', description: '', bullets: [] },
-        { id: 'sk3', category: 'UX & Research', skills: 'Figma, User Interviews, Usability Testing, Jobs-to-be-Done, Journey Mapping, Design Thinking', description: '', bullets: [] },
-        { id: 'sk4', category: 'Execution & Tools', skills: 'Agile/Scrum, JIRA, Confluence, Notion, Linear, Amplitude, Sprint Planning, Stakeholder Management', description: '', bullets: [] },
-        { id: 'sk5', category: 'Technical Fluency', skills: 'REST APIs, iOS/Android basics, Data Pipelines, System Design (conceptual), HTML/CSS basics', description: '', bullets: [] },
-      ],
-    },
-    // ── EXPERIENCE ──────────────────────────────────────────────────────────────
-    {
-      id: 's_experience',
-      type: 'experience',
-      title: 'Experience',
-      settings: { spacing: 'normal', columns: 1, showDates: true, showLocation: true, titleStyle: 'stacked' },
-      items: [
-        {
-          id: 'exp1',
-          company: 'Google',
-          role: 'Senior Product Manager — Google Maps',
-          location: 'Mountain View, CA',
-          startDate: '03/2022',
-          endDate: '',
-          current: true,
-          description: '<ul><li>Shipped real-time incident reporting to Google Maps, reaching 50M+ daily active users within 3 months of GA launch</li><li>Led a cross-functional team of 12 engineers, 3 designers, and 2 data scientists through full product lifecycle — discovery to GA</li><li>Improved navigation ETA accuracy by 23% by partnering with ML to integrate a new traffic prediction model; reduced driver frustration scores by 18%</li><li>Ran 40+ A/B experiments to optimize alert relevance, cutting false-positive traffic notifications by 40%</li><li>Defined and tracked quarterly OKRs for Maps Live Traffic pillar; exceeded all 4 key results in Q3 2023</li></ul><p><em>Impact: 50M+ users, 23% ETA accuracy lift, 40% false-positive reduction</em></p>',
-          bullets: [],
-        },
-        {
-          id: 'exp2',
-          company: 'Meta',
-          role: 'Product Manager — News Feed & Reels',
-          location: 'Menlo Park, CA',
-          startDate: '08/2019',
-          endDate: '02/2022',
-          current: false,
-          description: '<ul><li>Led complete redesign of Facebook News Feed ranking signals, increasing meaningful social interactions by 18% across 1B+ users</li><li>Drove Reels adoption strategy, contributing to a 30% increase in short-form video engagement QoQ over two quarters</li><li>Shipped Facebook Watch discovery tab from 0 to 15M DAU in 6 months through iterative testing and personalization improvements</li><li>Ran 200+ feed algorithm experiments; built the first cross-team experiment prioritization framework adopted by 4 PM teams</li></ul><p><em>Impact: 18% social interaction lift, 30% Reels engagement growth, 15M DAU Watch launch</em></p>',
-          bullets: [],
-        },
-        {
-          id: 'exp3',
-          company: 'Amazon',
-          role: 'Associate Product Manager — Alexa Smart Home',
-          location: 'Seattle, WA',
-          startDate: '06/2017',
-          endDate: '07/2019',
-          current: false,
-          description: '<ul><li>Defined and launched Alexa Smart Home Routines — now used by 45M+ households globally</li><li>Reduced Alexa skill onboarding drop-off by 60% through a redesigned first-run experience based on 80+ user interviews</li><li>Collaborated with hardware, ML, and 30+ third-party device integration teams to ship Routines on time and on budget</li><li>Built the business case for Routines feature investment; secured $2M engineering budget via VP-level presentation</li></ul><p><em>Impact: 45M+ households, 60% onboarding drop-off reduction</em></p>',
-          bullets: [],
-        },
-      ],
-    },
-    // ── PROJECTS ────────────────────────────────────────────────────────────────
-    {
-      id: 's_projects',
-      type: 'projects',
-      title: 'Projects',
-      settings: { spacing: 'normal', columns: 1, showDates: true, titleStyle: 'stacked' },
-      items: [
-        {
-          id: 'proj1',
-          name: 'ProductOps — PM Productivity Suite',
-          url: 'https://productops.app',
-          technologies: 'Next.js, Supabase, TypeScript, Tailwind CSS',
-          startDate: '01/2024',
-          endDate: '',
-          description: '<ul><li>Built and shipped a PM productivity tool (OKR tracking, PRD templates, meeting notes) used by 500+ product managers</li><li>Grew to 500 users organically via Product Hunt launch — ranked #3 Product of the Day</li></ul>',
-          bullets: [],
-        },
-        {
-          id: 'proj2',
-          name: 'NPS Tracker — Open Source Analytics Dashboard',
-          url: 'https://github.com/mayachen/nps-tracker',
-          technologies: 'Python, Plotly Dash, PostgreSQL',
-          startDate: '06/2022',
-          endDate: '12/2022',
-          description: '<ul><li>Open-source NPS/CSAT analytics dashboard with 400+ GitHub stars, adopted by 3 YC-backed startups</li></ul>',
-          bullets: [],
-        },
-        {
-          id: 'proj3',
-          name: 'Roadmap.ai — AI-Powered Roadmap Generator',
-          url: '',
-          technologies: 'React, OpenAI API, Firebase',
-          startDate: '10/2023',
-          endDate: '03/2024',
-          description: '<ul><li>Prototype AI tool generating structured product roadmaps from uploaded research notes; prototype featured in Lenny\'s Newsletter</li></ul>',
-          bullets: [],
-        },
-      ],
-    },
-    // ── CERTIFICATIONS ──────────────────────────────────────────────────────────
-    {
-      id: 's_certifications',
-      type: 'certifications',
-      title: 'Certifications',
-      settings: { spacing: 'normal', showDates: true, columns: 1 },
-      items: [
-        { id: 'cert1', name: 'Certified Scrum Product Owner (CSPO)', issuer: 'Scrum Alliance', date: '01/2022', expiry: '01/2026', credentialId: 'CSA-1023847', url: 'https://scrumalliance.org' },
-        { id: 'cert2', name: 'Google Analytics Individual Qualification', issuer: 'Google', date: '03/2021', expiry: '03/2023', credentialId: 'GA-202103', url: '' },
-        { id: 'cert3', name: 'AWS Cloud Practitioner', issuer: 'Amazon Web Services', date: '11/2019', expiry: '', credentialId: 'AWS-CP-2019-11', url: '' },
-      ],
-    },
-    // ── AWARDS ──────────────────────────────────────────────────────────────────
-    {
-      id: 's_awards',
-      type: 'awards',
-      title: 'Awards & Honors',
-      settings: { spacing: 'normal', showDates: true },
-      items: [
-        { id: 'awd1', title: 'Product Manager of the Year', issuer: 'Google', date: '2023', description: 'Recognized company-wide for the Maps Live Traffic launch and sustained delivery excellence across 4 consecutive quarters.' },
-        { id: 'awd2', title: 'Lighthouse Award — Cross-Team Collaboration', issuer: 'Meta', date: '2021', description: 'Awarded for unifying 6 engineering teams around a shared experimentation framework that reduced experiment conflicts by 35%.' },
-        { id: 'awd3', title: "Dean's List", issuer: 'UC Berkeley', date: '2013–2015', description: 'Maintained 3.8 GPA across Computer Science core coursework.' },
-      ],
-    },
-    // ── VOLUNTEERING ────────────────────────────────────────────────────────────
-    {
-      id: 's_volunteering',
-      type: 'volunteering',
-      title: 'Volunteering',
-      settings: { spacing: 'normal', showDates: true, showLocation: true, titleStyle: 'stacked' },
-      items: [
-        {
-          id: 'vol1',
-          org: 'Code.org',
-          role: 'Volunteer Coding Educator',
-          location: 'San Francisco Bay Area',
-          startDate: '09/2020',
-          endDate: '',
-          description: '<ul><li>Teach introductory programming (Scratch, Python) to K-12 students in underserved communities — 200+ students reached to date</li><li>Developed a 6-week curriculum now used by 3 other volunteer instructors</li></ul>',
-          bullets: [],
-        },
-        {
-          id: 'vol2',
-          org: 'Women in Product',
-          role: 'Career Mentor',
-          location: 'Remote',
-          startDate: '01/2018',
-          endDate: '',
-          description: '<ul><li>Mentoring 4 early-career women in product management per cohort — mock interviews, resume reviews, and weekly 1:1 coaching sessions</li></ul>',
-          bullets: [],
-        },
-      ],
-    },
-    // ── LANGUAGES ───────────────────────────────────────────────────────────────
-    {
-      id: 's_languages',
-      type: 'languages',
-      title: 'Languages',
-      settings: { spacing: 'normal', columns: 3 },
-      items: [
-        { id: 'lang1', language: 'English', proficiency: 'Native' },
-        { id: 'lang2', language: 'Mandarin Chinese', proficiency: 'Professional' },
-        { id: 'lang3', language: 'Spanish', proficiency: 'Conversational' },
-      ],
-    },
-    // ── REFERENCES ──────────────────────────────────────────────────────────────
-    {
-      id: 's_references',
-      type: 'references',
-      title: 'References',
-      settings: { spacing: 'normal', columns: 2 },
-      items: [
-        { id: 'ref1', name: 'Sarah Kim', jobTitle: 'VP of Product', company: 'Google', relationship: 'Direct Manager', email: 'sarah.kim@google.com', phone: '+1 (650) 555-0141' },
-        { id: 'ref2', name: 'David Park', jobTitle: 'Engineering Director', company: 'Meta', relationship: 'Cross-functional Partner', email: 'dpark@meta.com', phone: 'Available on request' },
-      ],
-    },
-    // ── INTERESTS ───────────────────────────────────────────────────────────────
-    {
-      id: 's_interests',
-      type: 'interests',
-      title: 'Interests',
-      settings: { spacing: 'normal' },
-      items: [
-        { id: 'int1', interests: 'Trail hiking & ultramarathons, film photography (35mm), competitive chess (Elo 1650), behavioral economics (avid reader), open source contributions' },
-      ],
-    },
-    // ── CUSTOM — Publications ────────────────────────────────────────────────────
-    {
-      id: 's_publications',
-      type: 'custom',
-      title: 'Publications',
-      settings: { spacing: 'normal', columns: 1, titleStyle: 'stacked' },
-      items: [
-        { id: 'pub1', title: 'The Data-Driven PM', subtitle: 'Medium — Article Series', date: '2022–Present', location: '', description: '<ul><li>8-part series on quantitative product management; 28,000+ readers, featured in Lenny\'s Newsletter and The Product Compass</li></ul>', bullets: [] },
-        { id: 'pub2', title: 'Building for Billions', subtitle: 'Product Hunt Blog', date: '09/2023', location: '', description: '<ul><li>Case study on designing inclusive, globally-scaled features drawing from Google Maps internals</li></ul>', bullets: [] },
-      ],
-    },
-    // ── EDUCATION ───────────────────────────────────────────────────────────────
-    {
-      id: 's_education',
-      type: 'education',
-      title: 'Education',
-      settings: { spacing: 'normal', columns: 1, showDates: true, showLocation: true, titleStyle: 'stacked' },
-      items: [
-        {
-          id: 'edu1',
-          institution: 'Stanford Graduate School of Business',
-          degree: 'Master of Business Administration (MBA)',
-          fieldOfStudy: 'Product Management & Entrepreneurship',
-          location: 'Stanford, CA',
-          startDate: '09/2015',
-          endDate: '06/2017',
-          gpa: '3.9',
-          description: '<p>Focus: Technology Strategy, Consumer Behavior, Venture Capital. Startup Weekend winner (Spring 2016).</p>',
-          bullets: [],
-        },
-        {
-          id: 'edu2',
-          institution: 'University of California, Berkeley',
-          degree: 'Bachelor of Science — Computer Science',
-          fieldOfStudy: '',
-          location: 'Berkeley, CA',
-          startDate: '08/2011',
-          endDate: '05/2015',
-          gpa: '3.8',
-          description: "<p>Dean's List 2013–2015. Undergraduate research in HCI lab under Prof. Björn Hartmann.</p>",
-          bullets: [],
-        },
-      ],
-    },
-  ],
-  coverLetter: {
-    recipientName: 'Hiring Team',
-    recipientTitle: 'Director of Product Management',
-    company: '[Company Name]',
-    date: '',
-    subject: 'Application — VP of Product',
-    body: '<p>I am excited to apply for the VP of Product role at [Company Name]. With over 8 years of product leadership spanning Google, Meta, and Amazon — and a track record of shipping features to 50M+ users — I am drawn to your mission and believe I can drive meaningful impact from day one.</p><p>At Google, I led the end-to-end launch of real-time incident reporting in Maps, a feature now used daily by 50M+ people that improved navigation accuracy by 23%. At Meta, I owned the News Feed ranking redesign that increased meaningful social interactions by 18% across more than a billion users. These experiences have sharpened my ability to operate at scale, balance competing stakeholder needs, and make high-quality decisions under ambiguity.</p><p>What excites me about [Company Name] is the depth of the problem space and the caliber of the team you have assembled. I would relish the opportunity to build a product organization that operates with the same rigor and user empathy I have cultivated throughout my career.</p><p>Thank you for your time and consideration. I look forward to the conversation.</p>',
-    closing: 'Best regards',
-    signatureName: 'Maya Chen',
-    signatureDesignation: 'Senior Product Manager',
-    signatureSpace: true,
-  },
+  personal: SAIRAM_PERSONAL,
+  sections: SAIRAM_SECTIONS,
+  coverLetter: BASE_COVER_LETTER,
 };
 
-// Factory functions to create a fresh empty section of each type.
-// Each factory seeds one blank item so the section title appears in the canvas immediately.
+// ── Minimal Template — ATS-friendly, clean & whitespace-first ─────────────────
 
-// ── Executive Template — ATS-friendly, accent headings, vibrant ───────────────
+export const defaultResumeDataMinimal = {
+  id: 'resume_minimal',
+  name: 'Minimal',
+  updatedAt: Date.now(),
+  template: 'minimal',
+  settings: {
+    ...ATS_DEFAULTS,
+    accentColor: '#374151',
+    textColor: '#111827',
+    headingStyle: 'underline',
+    sectionGap: 18,
+    itemGap: 10,
+    marginH: 20,
+    marginV: 16,
+  },
+  personal: SAIRAM_PERSONAL,
+  sections: SAIRAM_SECTIONS,
+  coverLetter: BASE_COVER_LETTER,
+};
+
+// ── Dark Template — Dark header, high contrast ────────────────────────────────
+
+export const defaultResumeDataDark = {
+  id: 'resume_dark',
+  name: 'Dark',
+  updatedAt: Date.now(),
+  template: 'dark',
+  settings: {
+    ...ATS_DEFAULTS,
+    accentColor: '#0f172a',
+    textColor: '#1a1a1a',
+    headingStyle: 'ruled',
+    sidebarBg: '#0f172a',
+    headerTextColor: '#ffffff',
+    nameColor: '#ffffff',
+    jobTitleColor: '#cbd5e1',
+  },
+  personal: SAIRAM_PERSONAL,
+  sections: SAIRAM_SECTIONS,
+  coverLetter: BASE_COVER_LETTER,
+};
+
+// ── Sidebar Template — Colored left sidebar ───────────────────────────────────
+
+export const defaultResumeDataSidebar = {
+  id: 'resume_sidebar',
+  name: 'Sidebar',
+  updatedAt: Date.now(),
+  template: 'sidebar',
+  settings: {
+    ...ATS_DEFAULTS,
+    accentColor: '#1e40af',
+    textColor: '#1a1a1a',
+    headingStyle: 'plain',
+    sidebarBg: '#1e40af',
+    headerTextColor: '#ffffff',
+    nameColor: '#ffffff',
+    jobTitleColor: '#bfdbfe',
+    sectionGap: 14,
+    itemGap: 10,
+  },
+  personal: SAIRAM_PERSONAL,
+  sections: SAIRAM_SECTIONS,
+  coverLetter: BASE_COVER_LETTER,
+};
+
+// ── Executive Template — ATS-friendly, accent underline headings ──────────────
 
 export const defaultResumeDataExecutive = {
   ...defaultResumeData,
@@ -563,6 +352,8 @@ export const defaultResumeDataExecutive = {
     itemGap: 10,
   },
 };
+
+// ── Section type factories ────────────────────────────────────────────────────
 
 export const SECTION_TYPE_DEFAULTS = {
   experience: (id) => ({

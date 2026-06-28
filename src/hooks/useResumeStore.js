@@ -1,28 +1,53 @@
 import { useState, useEffect } from 'react';
-import { defaultResumeData, dummyResumeData, defaultResumeDataExecutive, SECTION_TYPE_DEFAULTS, ATS_DEFAULTS } from '@/utils/defaultData';
+import {
+  defaultResumeData,
+  defaultResumeDataModern,
+  defaultResumeDataMinimal,
+  defaultResumeDataDark,
+  defaultResumeDataSidebar,
+  defaultResumeDataExecutive,
+  SECTION_TYPE_DEFAULTS,
+  ATS_DEFAULTS,
+} from '@/utils/defaultData';
 
 const STORAGE_KEY = 'cpwtcv_v1';
+const DATA_VERSION = 5;
+
+const TEMPLATE_DEFAULTS = [
+  defaultResumeData,
+  defaultResumeDataExecutive,
+  defaultResumeDataModern,
+  defaultResumeDataMinimal,
+  defaultResumeDataDark,
+  defaultResumeDataSidebar,
+];
+
+function seedResumes() {
+  const now = Date.now();
+  const resumes = TEMPLATE_DEFAULTS.map((d, i) => ({
+    ...JSON.parse(JSON.stringify(d)),
+    id: `resume_${now + i}`,
+    updatedAt: now,
+  }));
+  return { resumes, activeId: resumes[0].id, dataVersion: DATA_VERSION, deletedIds: [] };
+}
 
 function loadStore() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed.resumes && parsed.activeId) return parsed;
+      if (parsed.resumes && parsed.activeId && parsed.dataVersion === DATA_VERSION) return parsed;
     }
   } catch {}
-  const now = Date.now();
-  const sairam = { ...JSON.parse(JSON.stringify(defaultResumeData)), id: `resume_${now}`, updatedAt: now };
-  const exec   = { ...JSON.parse(JSON.stringify(defaultResumeDataExecutive)), id: `resume_${now + 1}`, updatedAt: now };
-  const maya   = { ...JSON.parse(JSON.stringify(dummyResumeData)), id: `resume_${now + 2}`, updatedAt: now };
-  return { resumes: [sairam, exec, maya], activeId: sairam.id };
+  return seedResumes();
 }
 
 export function useAppStore() {
   const [appState, setAppState] = useState(loadStore);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...appState, dataVersion: DATA_VERSION }));
   }, [appState]);
 
   const activeResume = appState.resumes.find(r => r.id === appState.activeId) || appState.resumes[0];
@@ -40,11 +65,13 @@ export function useAppStore() {
     }));
   }
 
-  // Called by cloud sync after merging cloud + local on sign-in
+  // Called by cloud sync after merging cloud + local on sign-in; clears local deletedIds
   function loadResumes(resumes) {
     setAppState(prev => ({
+      ...prev,
       resumes,
       activeId: resumes.find(r => r.id === prev.activeId) ? prev.activeId : (resumes[0]?.id || prev.activeId),
+      deletedIds: [],
     }));
   }
 
@@ -91,17 +118,20 @@ export function useAppStore() {
   function deleteResume(id) {
     setAppState(prev => {
       const remaining = prev.resumes.filter(r => r.id !== id);
+      const deletedIds = [...(prev.deletedIds || []), id];
       if (!remaining.length) {
         const newResume = {
           ...JSON.parse(JSON.stringify(defaultResumeData)),
           id: `resume_${Date.now()}`,
           updatedAt: Date.now(),
         };
-        return { resumes: [newResume], activeId: newResume.id };
+        return { ...prev, resumes: [newResume], activeId: newResume.id, deletedIds };
       }
       return {
+        ...prev,
         resumes: remaining,
         activeId: prev.activeId === id ? remaining[0].id : prev.activeId,
+        deletedIds,
       };
     });
   }
