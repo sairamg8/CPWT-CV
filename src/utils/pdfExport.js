@@ -166,22 +166,6 @@ export function exportToPDF(elementId, filename = 'resume.pdf', pageMargin = '14
         #__cpwtcv_print_portal__ svg {
           display: none !important;
         }
-
-        /* ATS COMPATIBILITY — override web font with a system font so Chrome's PDF
-           engine uses standard glyph-to-Unicode mappings instead of a custom subset
-           that some ATS parsers (e.g. Workday) misread (e.g. "WoW" → "Work"). */
-        #__cpwtcv_print_portal__ * {
-          font-family: Arial, Helvetica, 'Liberation Sans', sans-serif !important;
-        }
-
-        /* ATS COMPATIBILITY — strip bold from job-description content.
-           Bold <strong>/<b> project sub-headers inside descriptions (e.g.
-           "RFP Tool – Philips") look like new company/entry headers to ATS parsers,
-           causing them to lose the actual company name for that entry. */
-        #__cpwtcv_print_portal__ .rich-text-output strong,
-        #__cpwtcv_print_portal__ .rich-text-output b {
-          font-weight: normal !important;
-        }
       }
     `;
     document.head.appendChild(style);
