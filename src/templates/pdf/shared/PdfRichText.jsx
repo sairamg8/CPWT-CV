@@ -56,7 +56,7 @@ export function PdfRichText({ html, style = {} }) {
       const items = lists[parseInt(listMatch[1])];
       items.forEach((item, i) => {
         elements.push(
-          <View key={`li-${elements.length}-${i}`} style={{ flexDirection: 'row', marginBottom: 1 }}>
+          <View key={`li-${elements.length}-${i}`} style={{ flexDirection: 'row', marginBottom: 1 }} wrap={false}>
             <Text style={{ ...style, width: 10 }}>{'•'}</Text>
             <Text style={{ ...style, flex: 1 }}>{parseInlineSegments(item, style)}</Text>
           </View>

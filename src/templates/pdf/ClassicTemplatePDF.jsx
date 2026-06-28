@@ -1,254 +1,130 @@
-import { Document, Page, View, Text } from '@react-pdf/renderer';
-import { PdfSectionTitle } from './shared/PdfSection';
-import { PdfRichText } from './shared/PdfRichText';
+import { Document, Page, View, Text, Image } from '@react-pdf/renderer';
 import { styles as pageStyles } from './shared/PdfPage';
+import { PdfContactRow } from './shared/PdfContact';
+import { SectionRouter, getEffectiveSpacing } from './shared/PdfSections';
+import { PdfRichText } from './shared/PdfRichText';
 
-function ContactItems({ personal }) {
-  const hidden = personal?.hiddenFields || [];
-  const items = [
-    !hidden.includes('email')    && personal?.email,
-    !hidden.includes('phone')    && personal?.phone,
-    !hidden.includes('location') && personal?.location,
-    !hidden.includes('website')  && (personal?.websiteLabel || personal?.website),
-    !hidden.includes('linkedin') && (personal?.linkedinLabel || personal?.linkedin),
-    !hidden.includes('github')   && (personal?.githubLabel   || personal?.github),
-  ].filter(Boolean);
+// Helper to compute photo styles in PDF points
+function getPhotoStyle(settings, accent) {
+  const sh = settings?.photoShape || 'circle';
+  const sz = settings?.photoSize || 'md';
+  const br = settings?.photoBorder || 'accent';
+  const ph = settings?.photoHeight || 'match';
 
-  if (!items.length) return null;
-  return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 3 }}>
-      {items.map((item, i) => (
-        <Text key={i} style={{ fontSize: 9, color: '#555555', marginRight: 14, marginBottom: 1 }}>{item}</Text>
-      ))}
-    </View>
-  );
-}
+  // Translate browser pixels (~130, ~165, ~200) to PDF points (~40, ~50, ~65)
+  const w = sz === 'sm' ? 40 : sz === 'lg' ? 65 : 50;
+  const h = sh === 'circle' ? w : ph === 'tall' ? Math.round(w * 1.4) : ph === 'taller' ? Math.round(w * 1.8) : w;
 
-function ExperienceItem({ item, settings, titleOrder }) {
-  const accent = settings?.accentColor || '#111111';
-  const textColor = settings?.textColor || '#1a1a1a';
-  const entrySize = (settings?.fontSizeBase || 11) + (settings?.fontSizeEntryDelta ?? 0);
-  const lineH = settings?.lineHeightValue || 1.5;
-
-  const startD = item.startDate || item.start || '';
-  const endD   = item.current ? 'Present' : (item.endDate || item.end || '');
-  const dateStr = (startD || endD) ? `${startD}${endD ? ` – ${endD}` : ''}` : '';
-
-  const ord = titleOrder || 'company';
-  const mainTitle = ord === 'role' ? (item.role || '') : (item.company || '');
-  const subTitle  = ord === 'role' ? (item.company || '') : (item.role || '');
-  const loc = item.location || '';
-  const subLine = [subTitle, loc].filter(Boolean).join(' · ');
-
-  return (
-    <View wrap={false}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Text style={{ fontSize: entrySize, fontWeight: 'bold', color: textColor, flex: 1 }}>{mainTitle}</Text>
-        {dateStr ? <Text style={{ fontSize: 9, color: accent, flexShrink: 0, marginLeft: 8 }}>{dateStr}</Text> : null}
-      </View>
-      {subLine ? <Text style={{ fontSize: 9, color: '#4b5563', marginBottom: 2 }}>{subLine}</Text> : null}
-      {item.description && (
-        <PdfRichText html={item.description} style={{ fontSize: entrySize - 0.5, color: '#333333', lineHeight: lineH, marginTop: 2 }} />
-      )}
-    </View>
-  );
-}
-
-function EducationItem({ item, settings }) {
-  const accent = settings?.accentColor || '#111111';
-  const textColor = settings?.textColor || '#1a1a1a';
-  const entrySize = (settings?.fontSizeBase || 11) + (settings?.fontSizeEntryDelta ?? 0);
-
-  const sd = item.startDate || item.start || '';
-  const ed = item.endDate   || item.end   || '';
-  const dateStr = (sd || ed) ? `${sd}${ed ? ` – ${ed}` : ''}` : '';
-  const fieldOfStudy = item.fieldOfStudy || item.field || '';
-
-  return (
-    <View wrap={false}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Text style={{ fontSize: entrySize, fontWeight: 'bold', color: textColor, flex: 1 }}>
-          {item.institution || item.school}
-        </Text>
-        {dateStr ? <Text style={{ fontSize: 9, color: accent, flexShrink: 0, marginLeft: 8 }}>{dateStr}</Text> : null}
-      </View>
-      {item.degree && (
-        <Text style={{ fontSize: 9, color: '#4b5563' }}>
-          {item.degree}{fieldOfStudy ? `, ${fieldOfStudy}` : ''}
-        </Text>
-      )}
-    </View>
-  );
-}
-
-function SectionRouter({ section, settings }) {
-  if (section.visible === false) return null;
-
-  const accent = settings?.accentColor || '#111111';
-  const textColor = settings?.textColor || '#1a1a1a';
-  const baseSize = settings?.fontSizeBase || 11;
-  const sectionSize = baseSize + (settings?.fontSizeSectionDelta ?? 1);
-  const entrySize = baseSize + (settings?.fontSizeEntryDelta ?? 0);
-  const sectionGap = settings?.sectionGap ?? 16;
-  const itemGap = settings?.itemGap ?? 12;
-  const borderColor = settings?.sectionBorderColor || '';
-  const sectionBorderWidth = settings?.sectionBorderWidth ?? 1;
-  const lineH = settings?.lineHeightValue || 1.5;
-
-  const titleProps = {
-    title: section.title,
-    headingStyle: settings?.headingStyle || 'ruled',
-    accent,
-    sectionTitleCase: settings?.sectionTitleCase || 'upper',
-    sectionSize,
-    borderColor,
-    sectionBorderWidth,
+  return {
+    width: w,
+    height: h,
+    borderRadius: sh === 'rounded' ? 6 : sh === 'square' ? 1 : w / 2,
+    borderWidth: br === 'none' ? 0 : 1,
+    borderColor: br === 'none' ? 'transparent' : br === 'thin' ? '#e5e7eb' : accent,
+    objectFit: 'cover',
   };
-
-  const ss = section.settings || {};
-  const visibleItems = section.items?.filter(i => i.visible !== false) || [];
-
-  if (section.type === 'experience') {
-    return (
-      <View style={{ marginBottom: sectionGap }}>
-        <PdfSectionTitle {...titleProps} />
-        <View style={{ gap: itemGap }}>
-          {visibleItems.map((item, i) => (
-            <ExperienceItem key={i} item={item} settings={settings} titleOrder={ss.titleOrder || 'company'} />
-          ))}
-        </View>
-      </View>
-    );
-  }
-
-  if (section.type === 'skills') {
-    const sep = ss.separator === 'dash' ? ' – ' : ': ';
-    return (
-      <View style={{ marginBottom: sectionGap }}>
-        <PdfSectionTitle {...titleProps} />
-        <View style={{ gap: 4 }}>
-          {visibleItems.map((item, i) => {
-            const skillStr = Array.isArray(item.skills) ? item.skills.join(', ') : (item.skills || '');
-            return (
-              <Text key={i} style={{ fontSize: entrySize, lineHeight: lineH, color: '#4b5563' }}>
-                {item.category
-                  ? <Text style={{ fontWeight: 'bold', color: textColor }}>{item.category}{sep}</Text>
-                  : null}
-                {skillStr}
-              </Text>
-            );
-          })}
-        </View>
-      </View>
-    );
-  }
-
-  if (section.type === 'education') {
-    return (
-      <View style={{ marginBottom: sectionGap }}>
-        <PdfSectionTitle {...titleProps} />
-        <View style={{ gap: itemGap }}>
-          {visibleItems.map((item, i) => (
-            <EducationItem key={i} item={item} settings={settings} />
-          ))}
-        </View>
-      </View>
-    );
-  }
-
-  if (section.type === 'certifications') {
-    return (
-      <View style={{ marginBottom: sectionGap }}>
-        <PdfSectionTitle {...titleProps} />
-        <View style={{ gap: itemGap }}>
-          {visibleItems.map((item, i) => (
-            <View key={i} wrap={false}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: entrySize, fontWeight: 'bold', color: textColor }}>{item.name || item.title}</Text>
-                  {item.issuer && <Text style={{ fontSize: 9, color: '#4b5563' }}>{item.issuer}</Text>}
-                </View>
-                {item.date && <Text style={{ fontSize: 9, color: accent, flexShrink: 0, marginLeft: 8 }}>{item.date}</Text>}
-              </View>
-            </View>
-          ))}
-        </View>
-      </View>
-    );
-  }
-
-  // projects / custom / any unknown type
-  return (
-    <View style={{ marginBottom: sectionGap }}>
-      <PdfSectionTitle {...titleProps} />
-      <View style={{ gap: itemGap }}>
-        {visibleItems.map((item, i) => (
-          <View key={i}>
-            {item.title && (
-              <Text style={{ fontSize: entrySize, fontWeight: 'bold', color: textColor }}>{item.title}</Text>
-            )}
-            {item.description && (
-              <PdfRichText html={item.description} style={{ fontSize: entrySize - 0.5, color: '#333333', lineHeight: lineH }} />
-            )}
-          </View>
-        ))}
-      </View>
-    </View>
-  );
 }
 
 export function ClassicTemplatePDF({ data }) {
   const { personal, sections = [], settings = {} } = data;
-  const vMm = settings.marginV ?? 14;
-  const hMm = settings.marginH ?? 18;
-  const accent = settings.accentColor || '#111111';
-  const textColor = settings.textColor || '#1a1a1a';
-  const baseSize = settings.fontSizeBase || 11;
-  const nameSize = baseSize + (settings.fontSizeNameDelta ?? 8);
-  const entrySize = baseSize + (settings.fontSizeEntryDelta ?? 0);
-  const nameColor = settings.nameColor || textColor;
+  const vMm          = settings.marginV     ?? 14;
+  const hMm          = settings.marginH     ?? 18;
+  const accent       = settings.accentColor || '#111111';
+  const textColor    = settings.textColor   || '#1a1a1a';
+  const baseSize     = settings.fontSizeBase || 11;
+  const nameSize     = baseSize + (settings.fontSizeNameDelta  ?? 8);
+  const entrySize    = baseSize + (settings.fontSizeEntryDelta ?? 0);
+  const nameColor    = settings.nameColor    || textColor;
   const jobTitleColor = settings.jobTitleColor || accent;
-  const lineH = settings.lineHeightValue || 1.5;
+  const lineH        = settings.lineHeightValue || 1.5;
+  const hidden       = personal?.hiddenFields || [];
+
+  const headerAlign  = settings.headerAlign || 'left';
+  const headerLayout = settings.headerLayout || 'stack';
+  const centered     = headerAlign === 'center';
+
+  const showHeaderBorder = settings.showHeaderBorder !== false;
+  const headerBorderStyle = showHeaderBorder
+    ? { borderBottomWidth: settings.headerBorderWidth || 2, borderBottomColor: accent, paddingBottom: 8 }
+    : {};
+
+  // Photo text alignment vertical flex placement
+  const photoTextAlign = settings.photoTextAlign || 'center';
+  const alignSelfVal = photoTextAlign === 'bottom' ? 'flex-end' : photoTextAlign === 'center' ? 'center' : 'flex-start';
 
   return (
     <Document>
       <Page
         size="A4"
-        style={[
-          pageStyles.page,
-          {
-            fontFamily: settings._pdfFontFamily || 'NotoSans',
-            paddingTop: `${vMm}mm`,
-            paddingBottom: `${vMm}mm`,
-            paddingLeft: `${hMm}mm`,
-            paddingRight: `${hMm}mm`,
-            fontSize: baseSize,
-            lineHeight: lineH,
-            color: textColor,
-          },
-        ]}
+        style={[pageStyles.page, {
+          fontFamily:    settings._pdfFontFamily || 'NotoSans',
+          paddingTop:    `${vMm}mm`,
+          paddingBottom: `${vMm}mm`,
+          paddingLeft:   `${hMm}mm`,
+          paddingRight:  `${hMm}mm`,
+          fontSize:      baseSize,
+          lineHeight:    lineH,
+          color:         textColor,
+        }]}
       >
-        {/* Header: name → title → contacts → summary */}
-        <View style={{ marginBottom: 16 }}>
-          <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor, marginBottom: 2 }}>
-            {personal?.name}
-          </Text>
-          {personal?.title && (
-            <Text style={{ fontSize: entrySize, color: jobTitleColor, marginBottom: 1 }}>
-              {personal.title}
-            </Text>
-          )}
-          <ContactItems personal={personal} />
-          {personal?.summary && (
+        {/* Header */}
+        <View style={[{ marginBottom: 14 }, headerBorderStyle]}>
+          <View style={{
+            flexDirection: centered ? 'column' : 'row',
+            alignItems: centered ? 'center' : alignSelfVal,
+            gap: 12,
+            marginBottom: 4,
+            width: '100%'
+          }}>
+            {personal?.photo && !hidden.includes('photo') && (
+              <Image src={personal.photo} style={getPhotoStyle(settings, accent)} />
+            )}
+            <View style={{ flex: 1, alignItems: centered ? 'center' : 'stretch', width: '100%' }}>
+              {headerLayout === 'inline' ? (
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', gap: settings.headerInlineGap ?? 8, justifyContent: centered ? 'center' : 'flex-start' }}>
+                  <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor }}>
+                    {personal?.name || 'Your Name'}
+                  </Text>
+                  {personal?.title && (
+                    <Text style={{ fontSize: entrySize, color: jobTitleColor, fontWeight: 'medium' }}>
+                      {personal.title}
+                    </Text>
+                  )}
+                </View>
+              ) : (
+                <>
+                  <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor, marginBottom: 1, textAlign: centered ? 'center' : 'left' }}>
+                    {personal?.name || 'Your Name'}
+                  </Text>
+                  {personal?.title && (
+                    <Text style={{ fontSize: entrySize, color: jobTitleColor, marginBottom: 1, textAlign: centered ? 'center' : 'left' }}>
+                      {personal.title}
+                    </Text>
+                  )}
+                </>
+              )}
+              <PdfContactRow personal={personal} settings={settings} />
+            </View>
+          </View>
+
+          {!hidden.includes('summary') && personal?.summary &&
+           personal.summary.replace(/<[^>]*>/g, '').trim() && (
             <View style={{ marginTop: 8 }}>
-              <PdfRichText html={personal.summary} style={{ fontSize: baseSize - 0.5, color: '#333333', lineHeight: lineH }} />
+              <PdfRichText html={personal.summary} style={{ fontSize: baseSize - 0.5, color: '#333333', lineHeight: lineH, textAlign: centered ? 'center' : 'left' }} />
             </View>
           )}
         </View>
 
-        {sections.map((section) => (
-          <SectionRouter key={section.id} section={section} settings={settings} />
-        ))}
+        {/* Body sections */}
+        {sections.map((section) => {
+          if (section.visible === false) return null;
+          const { marginBottom, spaceBefore, itemGap } = getEffectiveSpacing(section, settings);
+          return (
+            <View key={section.id} style={spaceBefore != null ? { marginTop: spaceBefore } : {}}>
+              <SectionRouter section={section} settings={settings} marginBottom={marginBottom} itemGap={itemGap} />
+            </View>
+          );
+        })}
       </Page>
     </Document>
   );

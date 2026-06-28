@@ -8,11 +8,13 @@ export function PdfSectionTitle({
   sectionSize = 11,
   borderColor = '',
   sectionBorderWidth = 1,
+  centered = false,
 }) {
   const label = sectionTitleCase === 'upper' ? title.toUpperCase() : title;
   const bc = borderColor || accent;
-  const accentText  = { fontSize: sectionSize, fontWeight: 'bold', color: accent, letterSpacing: 0.7 };
-  const neutralText = { fontSize: sectionSize, fontWeight: 'bold', color: '#374151', letterSpacing: 0.7 };
+  const textAlignment = centered ? { textAlign: 'center' } : {};
+  const accentText  = { fontSize: sectionSize, fontWeight: 'bold', color: accent, letterSpacing: 0.7, ...textAlignment };
+  const neutralText = { fontSize: sectionSize, fontWeight: 'bold', color: '#374151', letterSpacing: 0.7, ...textAlignment };
 
   if (headingStyle === 'ruled') {
     return (
@@ -31,7 +33,7 @@ export function PdfSectionTitle({
   }
   if (headingStyle === 'leftbar') {
     return (
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: centered ? 'center' : 'flex-start', marginBottom: 6 }}>
         <View style={{ width: sectionBorderWidth + 2, backgroundColor: bc, alignSelf: 'stretch', marginRight: 6 }} />
         <Text style={neutralText}>{label}</Text>
       </View>
@@ -39,19 +41,22 @@ export function PdfSectionTitle({
   }
   if (headingStyle === 'box') {
     return (
-      <View style={{ backgroundColor: bc, paddingVertical: 3, paddingHorizontal: 6, marginBottom: 6 }}>
-        <Text style={{ ...accentText, color: 'white' }}>{label}</Text>
+      <View style={{ backgroundColor: bc + '14', paddingVertical: 3, paddingHorizontal: 6, marginBottom: 6, borderRadius: 2 }}>
+        <Text style={accentText}>{label}</Text>
       </View>
     );
   }
   if (headingStyle === 'line') {
+    const lineColor = borderColor || (accent + '40');
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-        <Text style={{ ...accentText, marginRight: 8 }}>{label}</Text>
-        <View style={{ flex: 1, height: sectionBorderWidth, backgroundColor: borderColor || (accent + '40') }} />
+        {centered && <View style={{ flex: 1, height: sectionBorderWidth, backgroundColor: lineColor, marginRight: 8 }} />}
+        <Text style={{ ...accentText, marginRight: centered ? 0 : 8 }}>{label}</Text>
+        <View style={{ flex: 1, height: sectionBorderWidth, backgroundColor: lineColor, marginLeft: centered ? 8 : 0 }} />
       </View>
     );
   }
   // plain
   return <Text style={{ ...accentText, marginBottom: 6 }}>{label}</Text>;
 }
+

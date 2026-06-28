@@ -1,2 +1,139 @@
-// TODO: implement full Executive layout — falls back to Classic layout for now
-export { ClassicTemplatePDF as ExecutiveTemplatePDF } from './ClassicTemplatePDF';
+import { Document, Page, View, Text, Image } from '@react-pdf/renderer';
+import { styles as pageStyles } from './shared/PdfPage';
+import { PdfContactRow } from './shared/PdfContact';
+import { SectionRouter, getEffectiveSpacing } from './shared/PdfSections';
+import { PdfRichText } from './shared/PdfRichText';
+
+// Helper to compute photo styles in PDF points
+function getPhotoStyle(settings, accent) {
+  const sh = settings?.photoShape || 'circle';
+  const sz = settings?.photoSize || 'md';
+  const br = settings?.photoBorder || 'accent';
+  const ph = settings?.photoHeight || 'match';
+
+  const w = sz === 'sm' ? 40 : sz === 'lg' ? 65 : 50;
+  const h = sh === 'circle' ? w : ph === 'tall' ? Math.round(w * 1.4) : ph === 'taller' ? Math.round(w * 1.8) : w;
+
+  return {
+    width: w,
+    height: h,
+    borderRadius: sh === 'rounded' ? 6 : sh === 'square' ? 1 : w / 2,
+    borderWidth: br === 'none' ? 0 : 1,
+    borderColor: br === 'none' ? 'transparent' : br === 'thin' ? '#e5e7eb' : accent,
+    objectFit: 'cover',
+  };
+}
+
+export function ExecutiveTemplatePDF({ data }) {
+  const { personal, sections = [], settings = {} } = data;
+  const vMm           = settings.marginV        ?? 14;
+  const hMm           = settings.marginH        ?? 18;
+  const accent        = settings.accentColor    || '#2563eb';
+  const textColor     = settings.textColor      || '#111111';
+  const nameColor     = settings.nameColor      || textColor;
+  const jobTitleColor = settings.jobTitleColor  || accent;
+  const baseSize      = settings.fontSizeBase   || 11;
+  const nameSize      = baseSize + (settings.fontSizeNameDelta  ?? 8);
+  const entrySize     = baseSize + (settings.fontSizeEntryDelta ?? 0);
+  const lineH         = settings.lineHeightValue || 1.5;
+  const hidden        = personal?.hiddenFields  || [];
+
+  const headerAlign  = settings.headerAlign || 'left';
+  const headerLayout = settings.headerLayout || 'stack';
+  const centered     = headerAlign === 'center';
+
+  const showHeaderBorder  = settings.showHeaderBorder !== false;
+  const headerBorderStyle = showHeaderBorder
+    ? { borderBottomWidth: settings.headerBorderWidth || 2, borderBottomColor: accent, paddingBottom: 8 }
+    : {};
+
+  const photoTextAlign = settings.photoTextAlign || 'center';
+  const alignSelfVal = photoTextAlign === 'bottom' ? 'flex-end' : photoTextAlign === 'center' ? 'center' : 'flex-start';
+
+  return (
+    <Document>
+      <Page
+        size="A4"
+        style={[pageStyles.page, {
+          fontFamily:    settings._pdfFontFamily || 'NotoSans',
+          paddingTop:    `${vMm}mm`,
+          paddingBottom: `${vMm}mm`,
+          paddingLeft:   `${hMm}mm`,
+          paddingRight:  `${hMm}mm`,
+          fontSize:      baseSize,
+          lineHeight:    lineH,
+          color:         textColor,
+        }]}
+      >
+        {/* Header */}
+        <View style={[{ marginBottom: 14 }, headerBorderStyle]}>
+          <View style={{
+            flexDirection: centered ? 'column' : 'row',
+            alignItems: centered ? 'center' : alignSelfVal,
+            gap: 12,
+            marginBottom: 4,
+            width: '100%'
+          }}>
+            {personal?.photo && !hidden.includes('photo') && (
+              <Image src={personal.photo} style={getPhotoStyle(settings, accent)} />
+            )}
+            <View style={{ flex: 1, alignItems: centered ? 'center' : 'stretch', width: '100%' }}>
+              {headerLayout === 'inline' ? (
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', gap: settings.headerInlineGap ?? 8, justifyContent: centered ? 'center' : 'flex-start' }}>
+                  <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor }}>
+                    {personal?.name || 'Your Name'}
+                  </Text>
+                  {personal?.title && (
+                    <Text style={{ fontSize: entrySize, color: jobTitleColor, fontWeight: 'medium' }}>
+                      {personal.title}
+                    </Text>
+                  )}
+                </View>
+              ) : (
+                <>
+                  <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor, marginBottom: 1, textAlign: centered ? 'center' : 'left' }}>
+                    {personal?.name || 'Your Name'}
+                  </Text>
+                  {personal?.title && (
+                    <Text style={{ fontSize: entrySize, color: jobTitleColor, marginBottom: 1, textAlign: centered ? 'center' : 'left' }}>
+                      {personal.title}
+                    </Text>
+                  )}
+                </>
+              )}
+              <PdfContactRow personal={personal} settings={settings} />
+            </View>
+          </View>
+
+          {!hidden.includes('summary') && personal?.summary &&
+           personal.summary.replace(/<[^>]*>/g, '').trim() && (
+            <View style={{ marginTop: 8 }}>
+              <PdfRichText html={personal.summary} style={{ fontSize: baseSize - 0.5, color: '#333333', lineHeight: lineH, textAlign: centered ? 'center' : 'left' }} />
+            </View>
+          )}
+        </View>
+
+        {/* Body sections — italicSubs=true for Executive italic secondary text */}
+        {sections.map((section) => {
+          if (section.visible === false) return null;
+          const { marginBottom, spaceBefore, itemGap } = getEffectiveSpacing(section, settings);
+          // Executive default: titleOrder='role' when section doesn't override it
+          const execSection = section.type === 'experience' && !section.settings?.titleOrder
+            ? { ...section, settings: { ...section.settings, titleOrder: 'role' } }
+            : section;
+          return (
+            <View key={section.id} style={spaceBefore != null ? { marginTop: spaceBefore } : {}}>
+              <SectionRouter
+                section={execSection}
+                settings={settings}
+                marginBottom={marginBottom}
+                itemGap={itemGap}
+                italicSubs
+              />
+            </View>
+          );
+        })}
+      </Page>
+    </Document>
+  );
+}
