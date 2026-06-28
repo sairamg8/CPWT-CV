@@ -5,12 +5,30 @@ import {
   defaultResumeDataMinimal,
   defaultResumeDataDark,
   defaultResumeDataSidebar,
-  defaultResumeDataExecutive,
   SECTION_TYPE_DEFAULTS,
   ATS_DEFAULTS,
 } from '@/utils/defaultData';
 
 const STORAGE_KEY = 'cpwtcv_v1';
+const DATA_VERSION = 3;
+
+const TEMPLATE_DEFAULTS = [
+  defaultResumeData,
+  defaultResumeDataModern,
+  defaultResumeDataMinimal,
+  defaultResumeDataDark,
+  defaultResumeDataSidebar,
+];
+
+function seedResumes() {
+  const now = Date.now();
+  const resumes = TEMPLATE_DEFAULTS.map((d, i) => ({
+    ...JSON.parse(JSON.stringify(d)),
+    id: `resume_${now + i}`,
+    updatedAt: now,
+  }));
+  return { resumes, activeId: resumes[0].id, dataVersion: DATA_VERSION };
+}
 const DATA_VERSION = 5;
 
 const TEMPLATE_DEFAULTS = [
@@ -39,7 +57,7 @@ function loadStore() {
       const parsed = JSON.parse(saved);
       if (parsed.resumes && parsed.activeId && parsed.dataVersion === DATA_VERSION) return parsed;
     }
-  } catch {}
+  } catch { }
   return seedResumes();
 }
 
@@ -47,6 +65,7 @@ export function useAppStore() {
   const [appState, setAppState] = useState(loadStore);
 
   useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...appState, dataVersion: DATA_VERSION }));
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...appState, dataVersion: DATA_VERSION }));
   }, [appState]);
 
@@ -176,10 +195,10 @@ export function useAppStore() {
 
   const TEMPLATE_STYLE_DEFAULTS = {
     executive: { headingStyle: 'underline', sectionTitleCase: 'normal' },
-    classic:   { headingStyle: 'ruled',     sectionTitleCase: 'upper'  },
-    modern:    { headingStyle: 'line',      sectionTitleCase: 'upper'  },
-    minimal:   { headingStyle: 'underline', sectionTitleCase: 'upper'  },
-    sidebar:   { headingStyle: 'plain',     sectionTitleCase: 'upper'  },
+    classic: { headingStyle: 'ruled', sectionTitleCase: 'upper' },
+    modern: { headingStyle: 'line', sectionTitleCase: 'upper' },
+    minimal: { headingStyle: 'underline', sectionTitleCase: 'upper' },
+    sidebar: { headingStyle: 'plain', sectionTitleCase: 'upper' },
   };
 
   function setTemplate(template) {

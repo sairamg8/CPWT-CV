@@ -241,6 +241,24 @@ export const defaultResumeData = {
   coverLetter: BASE_COVER_LETTER,
 };
 
+// ── Classic Template — ATS-friendly, two-column header ────────────────────────
+
+export const defaultResumeData = {
+  id: 'resume_default',
+  name: 'Classic',
+  updatedAt: Date.now(),
+  template: 'classic',
+  settings: {
+    ...ATS_DEFAULTS,
+    accentColor: '#1a1a1a',
+    headingStyle: 'ruled',
+    headerAlign: 'left',
+  },
+  personal: SAIRAM_PERSONAL,
+  sections: SAIRAM_SECTIONS,
+  coverLetter: BASE_COVER_LETTER,
+};
+
 // ── Modern Template — Bold accent header, full-width ──────────────────────────
 
 export const defaultResumeDataModern = {
@@ -329,28 +347,6 @@ export const defaultResumeDataSidebar = {
   personal: SAIRAM_PERSONAL,
   sections: SAIRAM_SECTIONS,
   coverLetter: BASE_COVER_LETTER,
-};
-
-// ── Executive Template — ATS-friendly, accent underline headings ──────────────
-
-export const defaultResumeDataExecutive = {
-  ...defaultResumeData,
-  id: 'resume_executive',
-  name: 'Executive',
-  updatedAt: Date.now(),
-  template: 'executive',
-  settings: {
-    ...ATS_DEFAULTS,
-    accentColor: '#2563eb',
-    textColor: '#111111',
-    headingStyle: 'underline',
-    sectionTitleCase: 'normal',
-    contactStyle: 'icon',
-    contactLayout: 'justify',
-    fontSizeNameDelta: 9,
-    sectionGap: 16,
-    itemGap: 10,
-  },
 };
 
 // ── Section type factories ────────────────────────────────────────────────────
