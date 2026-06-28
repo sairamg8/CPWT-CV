@@ -39,7 +39,7 @@ function loadStore() {
       const parsed = JSON.parse(saved);
       if (parsed.resumes && parsed.activeId && parsed.dataVersion === DATA_VERSION) return parsed;
     }
-  } catch {}
+  } catch { }
   return seedResumes();
 }
 
@@ -176,10 +176,10 @@ export function useAppStore() {
 
   const TEMPLATE_STYLE_DEFAULTS = {
     executive: { headingStyle: 'underline', sectionTitleCase: 'normal' },
-    classic:   { headingStyle: 'ruled',     sectionTitleCase: 'upper'  },
-    modern:    { headingStyle: 'line',      sectionTitleCase: 'upper'  },
-    minimal:   { headingStyle: 'underline', sectionTitleCase: 'upper'  },
-    sidebar:   { headingStyle: 'plain',     sectionTitleCase: 'upper'  },
+    classic: { headingStyle: 'ruled', sectionTitleCase: 'upper' },
+    modern: { headingStyle: 'line', sectionTitleCase: 'upper' },
+    minimal: { headingStyle: 'underline', sectionTitleCase: 'upper' },
+    sidebar: { headingStyle: 'plain', sectionTitleCase: 'upper' },
   };
 
   function setTemplate(template) {
