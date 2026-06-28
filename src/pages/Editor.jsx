@@ -25,6 +25,7 @@ import { ExportDropdown } from '@/components/ExportDropdown';
 import ClassicTemplate from '@/templates/ClassicTemplate';
 import CoverLetterTemplate from '@/templates/CoverLetterTemplate';
 import { exportToPDF } from '@/utils/pdfExport';
+import { exportToPDFReact } from '@/utils/pdfExportReactPDF';
 import { exportToWord } from '@/utils/wordExport';
 import { getFontById, loadGoogleFont, loadCustomGoogleFont } from '@/utils/fonts';
 
@@ -147,6 +148,13 @@ export function Editor({ store, auth, sync }) {
   async function handleExportPDF() {
     setExporting('pdf');
     const filename = buildExportFilename(auth?.user, resume);
+    try { await exportToPDFReact(resume, `${filename}.pdf`); } catch (e) { console.error('PDF export failed:', e); }
+    setExporting(null);
+  }
+
+  async function handleExportPDFLegacy() {
+    setExporting('pdf');
+    const filename = buildExportFilename(auth?.user, resume);
     await exportToPDF(activeTab === 'coverletter' ? 'cover-letter-preview' : 'resume-preview', `${filename}.pdf`, margin);
     setExporting(null);
   }
@@ -210,6 +218,7 @@ export function Editor({ store, auth, sync }) {
             <ExportDropdown
               exporting={exporting}
               onExportPDF={handleExportPDF}
+              onExportPDFLegacy={handleExportPDFLegacy}
               onExportWord={handleExportWord}
               onExportJSON={handleExportJSON}
               onImportJSON={data => { const newId = store.importResume(data); navigate(`/resume/${newId}`); }}
