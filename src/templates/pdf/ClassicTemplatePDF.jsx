@@ -1,24 +1,7 @@
-import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, View, Text } from '@react-pdf/renderer';
 import { PdfSectionTitle } from './shared/PdfSection';
 import { PdfRichText } from './shared/PdfRichText';
 import { styles as pageStyles } from './shared/PdfPage';
-
-const s = StyleSheet.create({
-  name:        { fontSize: 20, fontWeight: 'bold', marginBottom: 2 },
-  jobTitle:    { fontSize: 12, marginBottom: 6, color: '#374151' },
-  contactRow:  { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 },
-  contactItem: { fontSize: 9, color: '#4b5563', marginRight: 14 },
-  section:     { marginBottom: 14 },
-  entryWrap:   { marginBottom: 8 },
-  entryRow:    { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 },
-  entryTitle:  { fontSize: 10, fontWeight: 'bold', color: '#111111' },
-  entryMeta:   { fontSize: 9, color: '#4b5563' },
-  entryDate:   { fontSize: 9, color: '#4b5563' },
-  body:        { fontSize: 9.5, color: '#333333', lineHeight: 1.5 },
-  skillRow:    { flexDirection: 'row', marginBottom: 3 },
-  skillCat:    { fontSize: 9.5, fontWeight: 'bold', color: '#111111', width: 100 },
-  skillVal:    { fontSize: 9.5, color: '#333333', flex: 1 },
-});
 
 function ContactItems({ personal }) {
   const hidden = personal?.hiddenFields || [];
@@ -31,126 +14,185 @@ function ContactItems({ personal }) {
     !hidden.includes('github')   && (personal?.githubLabel   || personal?.github),
   ].filter(Boolean);
 
+  if (!items.length) return null;
   return (
-    <View style={s.contactRow}>
-      {items.map((item, i) => <Text key={i} style={s.contactItem}>{item}</Text>)}
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 3 }}>
+      {items.map((item, i) => (
+        <Text key={i} style={{ fontSize: 9, color: '#555555', marginRight: 14, marginBottom: 1 }}>{item}</Text>
+      ))}
     </View>
   );
 }
 
-function ExperienceItem({ item, settings }) {
+function ExperienceItem({ item, settings, titleOrder }) {
   const accent = settings?.accentColor || '#111111';
+  const textColor = settings?.textColor || '#1a1a1a';
+  const entrySize = (settings?.fontSizeBase || 11) + (settings?.fontSizeEntryDelta ?? 0);
+  const lineH = settings?.lineHeightValue || 1.5;
+
   const startD = item.startDate || item.start || '';
   const endD   = item.current ? 'Present' : (item.endDate || item.end || '');
-  const dateStr = startD && endD ? `${startD} – ${endD}` : (endD || startD);
+  const dateStr = (startD || endD) ? `${startD}${endD ? ` – ${endD}` : ''}` : '';
+
+  const ord = titleOrder || 'company';
+  const mainTitle = ord === 'role' ? (item.role || '') : (item.company || '');
+  const subTitle  = ord === 'role' ? (item.company || '') : (item.role || '');
+  const loc = item.location || '';
+  const subLine = [subTitle, loc].filter(Boolean).join(' · ');
+
   return (
-    <View style={s.entryWrap} wrap={false}>
-      <View style={s.entryRow}>
-        <View style={{ flex: 1 }}>
-          <Text style={[s.entryTitle, { color: accent }]}>{item.role || item.title}</Text>
-          {item.company && (
-            <Text style={s.entryMeta}>
-              {item.company}{item.location ? ` · ${item.location}` : ''}
-            </Text>
-          )}
-        </View>
-        {dateStr ? <Text style={s.entryDate}>{dateStr}</Text> : null}
+    <View wrap={false}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Text style={{ fontSize: entrySize, fontWeight: 'bold', color: textColor, flex: 1 }}>{mainTitle}</Text>
+        {dateStr ? <Text style={{ fontSize: 9, color: accent, flexShrink: 0, marginLeft: 8 }}>{dateStr}</Text> : null}
       </View>
-      {item.description && <PdfRichText html={item.description} style={s.body} />}
+      {subLine ? <Text style={{ fontSize: 9, color: '#4b5563', marginBottom: 2 }}>{subLine}</Text> : null}
+      {item.description && (
+        <PdfRichText html={item.description} style={{ fontSize: entrySize - 0.5, color: '#333333', lineHeight: lineH, marginTop: 2 }} />
+      )}
+    </View>
+  );
+}
+
+function EducationItem({ item, settings }) {
+  const accent = settings?.accentColor || '#111111';
+  const textColor = settings?.textColor || '#1a1a1a';
+  const entrySize = (settings?.fontSizeBase || 11) + (settings?.fontSizeEntryDelta ?? 0);
+
+  const sd = item.startDate || item.start || '';
+  const ed = item.endDate   || item.end   || '';
+  const dateStr = (sd || ed) ? `${sd}${ed ? ` – ${ed}` : ''}` : '';
+  const fieldOfStudy = item.fieldOfStudy || item.field || '';
+
+  return (
+    <View wrap={false}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Text style={{ fontSize: entrySize, fontWeight: 'bold', color: textColor, flex: 1 }}>
+          {item.institution || item.school}
+        </Text>
+        {dateStr ? <Text style={{ fontSize: 9, color: accent, flexShrink: 0, marginLeft: 8 }}>{dateStr}</Text> : null}
+      </View>
+      {item.degree && (
+        <Text style={{ fontSize: 9, color: '#4b5563' }}>
+          {item.degree}{fieldOfStudy ? `, ${fieldOfStudy}` : ''}
+        </Text>
+      )}
     </View>
   );
 }
 
 function SectionRouter({ section, settings }) {
   if (section.visible === false) return null;
+
+  const accent = settings?.accentColor || '#111111';
+  const textColor = settings?.textColor || '#1a1a1a';
+  const baseSize = settings?.fontSizeBase || 11;
+  const sectionSize = baseSize + (settings?.fontSizeSectionDelta ?? 1);
+  const entrySize = baseSize + (settings?.fontSizeEntryDelta ?? 0);
+  const sectionGap = settings?.sectionGap ?? 16;
+  const itemGap = settings?.itemGap ?? 12;
+  const borderColor = settings?.sectionBorderColor || '';
+  const sectionBorderWidth = settings?.sectionBorderWidth ?? 1;
+  const lineH = settings?.lineHeightValue || 1.5;
+
   const titleProps = {
     title: section.title,
-    headingStyle: settings?.headingStyle,
-    accent: settings?.accentColor,
-    sectionTitleCase: settings?.sectionTitleCase,
+    headingStyle: settings?.headingStyle || 'ruled',
+    accent,
+    sectionTitleCase: settings?.sectionTitleCase || 'upper',
+    sectionSize,
+    borderColor,
+    sectionBorderWidth,
   };
+
+  const ss = section.settings || {};
+  const visibleItems = section.items?.filter(i => i.visible !== false) || [];
 
   if (section.type === 'experience') {
     return (
-      <View style={s.section}>
+      <View style={{ marginBottom: sectionGap }}>
         <PdfSectionTitle {...titleProps} />
-        {section.items?.map((item, i) => (
-          <ExperienceItem key={i} item={item} settings={settings} />
-        ))}
+        <View style={{ gap: itemGap }}>
+          {visibleItems.map((item, i) => (
+            <ExperienceItem key={i} item={item} settings={settings} titleOrder={ss.titleOrder || 'company'} />
+          ))}
+        </View>
       </View>
     );
   }
 
   if (section.type === 'skills') {
+    const sep = ss.separator === 'dash' ? ' – ' : ': ';
     return (
-      <View style={s.section}>
+      <View style={{ marginBottom: sectionGap }}>
         <PdfSectionTitle {...titleProps} />
-        {section.items?.map((item, i) => (
-          <View key={i} style={s.skillRow}>
-            {item.category && <Text style={s.skillCat}>{item.category}:</Text>}
-            <Text style={s.skillVal}>
-              {Array.isArray(item.skills) ? item.skills.join(', ') : item.skills}
-            </Text>
-          </View>
-        ))}
+        <View style={{ gap: 4 }}>
+          {visibleItems.map((item, i) => {
+            const skillStr = Array.isArray(item.skills) ? item.skills.join(', ') : (item.skills || '');
+            return (
+              <Text key={i} style={{ fontSize: entrySize, lineHeight: lineH, color: '#4b5563' }}>
+                {item.category
+                  ? <Text style={{ fontWeight: 'bold', color: textColor }}>{item.category}{sep}</Text>
+                  : null}
+                {skillStr}
+              </Text>
+            );
+          })}
+        </View>
       </View>
     );
   }
 
   if (section.type === 'education') {
     return (
-      <View style={s.section}>
+      <View style={{ marginBottom: sectionGap }}>
         <PdfSectionTitle {...titleProps} />
-        {section.items?.map((item, i) => {
-          const sd = item.startDate || item.start || '';
-          const ed = item.endDate   || item.end   || '';
-          const dateStr = sd && ed ? `${sd} – ${ed}` : (ed || sd);
-          const fieldOfStudy = item.fieldOfStudy || item.field || '';
-          return (
-            <View key={i} style={{ marginBottom: 6 }} wrap={false}>
-              <View style={s.entryRow}>
-                <Text style={s.entryTitle}>{item.institution || item.school}</Text>
-                {dateStr ? <Text style={s.entryDate}>{dateStr}</Text> : null}
-              </View>
-              {item.degree && (
-                <Text style={s.entryMeta}>
-                  {item.degree}{fieldOfStudy ? `, ${fieldOfStudy}` : ''}
-                </Text>
-              )}
-            </View>
-          );
-        })}
+        <View style={{ gap: itemGap }}>
+          {visibleItems.map((item, i) => (
+            <EducationItem key={i} item={item} settings={settings} />
+          ))}
+        </View>
       </View>
     );
   }
 
   if (section.type === 'certifications') {
     return (
-      <View style={s.section}>
+      <View style={{ marginBottom: sectionGap }}>
         <PdfSectionTitle {...titleProps} />
-        {section.items?.map((item, i) => (
-          <View key={i} style={{ marginBottom: 4 }} wrap={false}>
-            <View style={s.entryRow}>
-              <Text style={s.entryTitle}>{item.name || item.title}</Text>
-              {item.date && <Text style={s.entryDate}>{item.date}</Text>}
+        <View style={{ gap: itemGap }}>
+          {visibleItems.map((item, i) => (
+            <View key={i} wrap={false}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: entrySize, fontWeight: 'bold', color: textColor }}>{item.name || item.title}</Text>
+                  {item.issuer && <Text style={{ fontSize: 9, color: '#4b5563' }}>{item.issuer}</Text>}
+                </View>
+                {item.date && <Text style={{ fontSize: 9, color: accent, flexShrink: 0, marginLeft: 8 }}>{item.date}</Text>}
+              </View>
             </View>
-            {item.issuer && <Text style={s.entryMeta}>{item.issuer}</Text>}
-          </View>
-        ))}
+          ))}
+        </View>
       </View>
     );
   }
 
   // projects / custom / any unknown type
   return (
-    <View style={s.section}>
+    <View style={{ marginBottom: sectionGap }}>
       <PdfSectionTitle {...titleProps} />
-      {section.items?.map((item, i) => (
-        <View key={i} style={{ marginBottom: 6 }}>
-          {item.title && <Text style={s.entryTitle}>{item.title}</Text>}
-          {item.description && <PdfRichText html={item.description} style={s.body} />}
-        </View>
-      ))}
+      <View style={{ gap: itemGap }}>
+        {visibleItems.map((item, i) => (
+          <View key={i}>
+            {item.title && (
+              <Text style={{ fontSize: entrySize, fontWeight: 'bold', color: textColor }}>{item.title}</Text>
+            )}
+            {item.description && (
+              <PdfRichText html={item.description} style={{ fontSize: entrySize - 0.5, color: '#333333', lineHeight: lineH }} />
+            )}
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -159,8 +201,14 @@ export function ClassicTemplatePDF({ data }) {
   const { personal, sections = [], settings = {} } = data;
   const vMm = settings.marginV ?? 14;
   const hMm = settings.marginH ?? 18;
-  const accent = settings.accentColor || '#374151';
-  const baseFontSize = settings.fontSizeBase || 11;
+  const accent = settings.accentColor || '#111111';
+  const textColor = settings.textColor || '#1a1a1a';
+  const baseSize = settings.fontSizeBase || 11;
+  const nameSize = baseSize + (settings.fontSizeNameDelta ?? 8);
+  const entrySize = baseSize + (settings.fontSizeEntryDelta ?? 0);
+  const nameColor = settings.nameColor || textColor;
+  const jobTitleColor = settings.jobTitleColor || accent;
+  const lineH = settings.lineHeightValue || 1.5;
 
   return (
     <Document>
@@ -174,24 +222,28 @@ export function ClassicTemplatePDF({ data }) {
             paddingBottom: `${vMm}mm`,
             paddingLeft: `${hMm}mm`,
             paddingRight: `${hMm}mm`,
-            fontSize: baseFontSize,
-            lineHeight: settings.lineHeightValue || 1.5,
+            fontSize: baseSize,
+            lineHeight: lineH,
+            color: textColor,
           },
         ]}
       >
-        <View style={{ marginBottom: 10 }}>
-          <Text style={[s.name, { color: accent, fontSize: baseFontSize + (settings.fontSizeNameDelta || 8) }]}>
+        {/* Header: name → title → contacts → summary */}
+        <View style={{ marginBottom: 16 }}>
+          <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor, marginBottom: 2 }}>
             {personal?.name}
           </Text>
           {personal?.title && (
-            <Text style={[s.jobTitle, { fontSize: baseFontSize + 1 }]}>
+            <Text style={{ fontSize: entrySize, color: jobTitleColor, marginBottom: 1 }}>
               {personal.title}
             </Text>
           )}
-          {personal?.summary && (
-            <PdfRichText html={personal.summary} style={{ ...s.body, marginBottom: 6 }} />
-          )}
           <ContactItems personal={personal} />
+          {personal?.summary && (
+            <View style={{ marginTop: 8 }}>
+              <PdfRichText html={personal.summary} style={{ fontSize: baseSize - 0.5, color: '#333333', lineHeight: lineH }} />
+            </View>
+          )}
         </View>
 
         {sections.map((section) => (
