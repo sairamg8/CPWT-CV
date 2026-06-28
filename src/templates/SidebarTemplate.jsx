@@ -1,5 +1,6 @@
 import { useContext } from 'react';
-import { Mail, Phone, MapPin, Globe, Link2, Code } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe } from 'lucide-react';
+import { LinkedinIcon, GithubIcon } from '@/utils/brandIcons';
 import { getFontById } from '@/utils/fonts';
 import { HeadingStyleContext } from '@/templates/headingStyle';
 import { SectionCaseContext } from '@/templates/sectionCase';
@@ -158,8 +159,8 @@ export default function SidebarTemplate({ data }) {
             {!hidden.has('phone')    && personal.phone    && <SideContact icon={Phone}  ckey="phone"    label="Phone"    text={personal.phone}    iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
             {!hidden.has('location') && personal.location && <SideContact icon={MapPin} ckey="location" label="Location" text={personal.location} iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
             {!hidden.has('website')  && personal.website  && <SideContact icon={Globe}  ckey="website"  label="Website"  text={personal.website}  display={personal.websiteLabel || personal.website}  iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
-            {!hidden.has('linkedin') && personal.linkedin && <SideContact icon={Link2}  ckey="linkedin" label="LinkedIn" text={personal.linkedin} display={personal.linkedinLabel || personal.linkedin} iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
-            {!hidden.has('github')   && personal.github   && <SideContact icon={Code}   ckey="github"   label="GitHub"   text={personal.github}   display={personal.githubLabel || personal.github}   iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
+            {!hidden.has('linkedin') && personal.linkedin && <SideContact icon={LinkedinIcon} ckey="linkedin" label="LinkedIn" text={personal.linkedin} display={personal.linkedinLabel || personal.linkedin} iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
+            {!hidden.has('github')   && personal.github   && <SideContact icon={GithubIcon}  ckey="github"   label="GitHub"   text={personal.github}   display={personal.githubLabel || personal.github}   iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
           </div>
         </div>
 
@@ -218,7 +219,7 @@ function SideContact({ icon: Icon, label, text, display, ckey, iconSize = 8, acc
   return (
     <div>
       <div className="flex items-center gap-1" style={{ color: '#94a3b8', fontSize: '9px' }}>
-        <Icon size={iconSize} strokeWidth={1.8} />
+        <Icon size={iconSize} strokeWidth={2} />
         <span className="uppercase tracking-wider font-bold">{label}</span>
       </div>
       <div style={{ color: '#cbd5e1', fontSize: '10px', wordBreak: 'break-all' }}>

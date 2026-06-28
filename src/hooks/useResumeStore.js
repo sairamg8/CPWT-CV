@@ -1,25 +1,51 @@
 import { useState, useEffect } from 'react';
-import { defaultResumeData, SECTION_TYPE_DEFAULTS, ATS_DEFAULTS } from '@/utils/defaultData';
+import {
+  defaultResumeData,
+  defaultResumeDataModern,
+  defaultResumeDataMinimal,
+  defaultResumeDataDark,
+  defaultResumeDataSidebar,
+  SECTION_TYPE_DEFAULTS,
+  ATS_DEFAULTS,
+} from '@/utils/defaultData';
 
 const STORAGE_KEY = 'cpwtcv_v1';
+const DATA_VERSION = 3;
+
+const TEMPLATE_DEFAULTS = [
+  defaultResumeData,
+  defaultResumeDataModern,
+  defaultResumeDataMinimal,
+  defaultResumeDataDark,
+  defaultResumeDataSidebar,
+];
+
+function seedResumes() {
+  const now = Date.now();
+  const resumes = TEMPLATE_DEFAULTS.map((d, i) => ({
+    ...JSON.parse(JSON.stringify(d)),
+    id: `resume_${now + i}`,
+    updatedAt: now,
+  }));
+  return { resumes, activeId: resumes[0].id, dataVersion: DATA_VERSION };
+}
 
 function loadStore() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed.resumes && parsed.activeId) return parsed;
+      if (parsed.resumes && parsed.activeId && parsed.dataVersion === DATA_VERSION) return parsed;
     }
   } catch {}
-  const resume = { ...JSON.parse(JSON.stringify(defaultResumeData)), id: `resume_${Date.now()}`, updatedAt: Date.now() };
-  return { resumes: [resume], activeId: resume.id };
+  return seedResumes();
 }
 
 export function useAppStore() {
   const [appState, setAppState] = useState(loadStore);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...appState, dataVersion: DATA_VERSION }));
   }, [appState]);
 
   const activeResume = appState.resumes.find(r => r.id === appState.activeId) || appState.resumes[0];
