@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { defaultResumeData, SECTION_TYPE_DEFAULTS, ATS_DEFAULTS } from '@/utils/defaultData';
+import { defaultResumeData, dummyResumeData, SECTION_TYPE_DEFAULTS, ATS_DEFAULTS } from '@/utils/defaultData';
 
 const STORAGE_KEY = 'cpwtcv_v1';
 
@@ -11,8 +11,9 @@ function loadStore() {
       if (parsed.resumes && parsed.activeId) return parsed;
     }
   } catch {}
-  const resume = { ...JSON.parse(JSON.stringify(defaultResumeData)), id: `resume_${Date.now()}`, updatedAt: Date.now() };
-  return { resumes: [resume], activeId: resume.id };
+  const sairam = { ...JSON.parse(JSON.stringify(defaultResumeData)), id: `resume_${Date.now()}`, updatedAt: Date.now() };
+  const maya = { ...JSON.parse(JSON.stringify(dummyResumeData)), id: `resume_${Date.now() + 1}`, updatedAt: Date.now() };
+  return { resumes: [sairam, maya], activeId: sairam.id };
 }
 
 export function useAppStore() {
