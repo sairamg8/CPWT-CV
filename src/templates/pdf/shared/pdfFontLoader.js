@@ -21,26 +21,28 @@ const FONT_MAP = {
 const CDN = 'https://cdn.jsdelivr.net/npm/@fontsource';
 const registered = new Set();
 
-// Register Noto Sans once at module load using local static files (avoids CDN dependency).
+// Register Noto Sans once at module load using local static woff files (avoids CDN dependency).
+// Using woff (zlib) not woff2 (Brotli) — @react-pdf/fontkit's Brotli decompressor is unreliable.
 Font.register({
   family: 'NotoSans',
   fonts: [
-    { src: '/fonts/noto-sans-latin-400-normal.woff2', fontWeight: 400 },
-    { src: '/fonts/noto-sans-latin-700-normal.woff2', fontWeight: 700 },
-    { src: '/fonts/noto-sans-latin-400-italic.woff2', fontStyle: 'italic', fontWeight: 400 },
+    { src: '/fonts/noto-sans-latin-400-normal.woff', fontWeight: 400 },
+    { src: '/fonts/noto-sans-latin-700-normal.woff', fontWeight: 700 },
+    { src: '/fonts/noto-sans-latin-400-italic.woff', fontStyle: 'italic', fontWeight: 400 },
   ],
 });
 registered.add('NotoSans');
 
 function registerFromCDN(family, pkg) {
   if (registered.has(family)) return;
+  // Use .woff (zlib) instead of .woff2 (Brotli) — fontkit decompresses woff reliably.
   const base = `${CDN}/${pkg}@5/files/${pkg}-latin`;
   Font.register({
     family,
     fonts: [
-      { src: `${base}-400-normal.woff2`, fontWeight: 400 },
-      { src: `${base}-700-normal.woff2`, fontWeight: 700 },
-      { src: `${base}-400-italic.woff2`, fontStyle: 'italic', fontWeight: 400 },
+      { src: `${base}-400-normal.woff`, fontWeight: 400 },
+      { src: `${base}-700-normal.woff`, fontWeight: 700 },
+      { src: `${base}-400-italic.woff`, fontStyle: 'italic', fontWeight: 400 },
     ],
   });
   registered.add(family);
@@ -65,9 +67,9 @@ export function registerPdfFont(settings) {
       Font.register({
         family: customFont,
         fonts: [
-          { src: `${base}-400-normal.woff2`, fontWeight: 400 },
-          { src: `${base}-700-normal.woff2`, fontWeight: 700 },
-          { src: `${base}-400-italic.woff2`, fontStyle: 'italic', fontWeight: 400 },
+          { src: `${base}-400-normal.woff`, fontWeight: 400 },
+          { src: `${base}-700-normal.woff`, fontWeight: 700 },
+          { src: `${base}-400-italic.woff`, fontStyle: 'italic', fontWeight: 400 },
         ],
       });
       registered.add(customFont);
