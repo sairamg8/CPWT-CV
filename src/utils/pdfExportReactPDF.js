@@ -1,5 +1,6 @@
 import React from 'react';
 import { pdf } from '@react-pdf/renderer';
+import { registerPdfFont } from '@/templates/pdf/shared/pdfFontLoader';
 
 const LOADERS = {
   classic:   () => import('@/templates/pdf/ClassicTemplatePDF').then(m => m.ClassicTemplatePDF),
@@ -12,9 +13,20 @@ const LOADERS = {
 export async function exportToPDFReact(resume, filename = 'resume.pdf') {
   const key = resume?.template || 'classic';
   const load = LOADERS[key] || LOADERS.classic;
-  const TemplatePDF = await load();
 
-  const element = React.createElement(TemplatePDF, { data: resume });
+  // Register the user's chosen font with react-pdf, get back the family name.
+  // For unknown/custom fonts, react-pdf silently falls back to Helvetica if the CDN file 404s.
+  const fontFamily = registerPdfFont(resume?.settings);
+
+  const [TemplatePDF] = await Promise.all([load()]);
+
+  // Inject resolved font family into settings so the template Page can apply it.
+  const data = {
+    ...resume,
+    settings: { ...resume?.settings, _pdfFontFamily: fontFamily },
+  };
+
+  const element = React.createElement(TemplatePDF, { data });
   const blob = await pdf(element).toBlob();
 
   const url = URL.createObjectURL(blob);

@@ -166,6 +166,7 @@ export function ClassicTemplatePDF({ data }) {
         style={[
           pageStyles.page,
           {
+            fontFamily: settings._pdfFontFamily || 'NotoSans',
             paddingTop: `${vMm}mm`,
             paddingBottom: `${vMm}mm`,
             paddingLeft: `${hMm}mm`,
