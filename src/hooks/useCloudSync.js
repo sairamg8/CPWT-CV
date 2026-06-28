@@ -58,8 +58,12 @@ export function useCloudSync({ user, appState, store }) {
           getDoc(deletionsDoc(user.uid)),
         ]);
 
-        const cloudResumes = snap.docs.map(d => d.data());
-        const deletedIds   = new Set(delSnap.exists() ? (delSnap.data().ids || []) : []);
+        const cloudResumes    = snap.docs.map(d => d.data());
+        const cloudDeletedIds = new Set(delSnap.exists() ? (delSnap.data().ids || []) : []);
+        // Combine Firestore deletions with any locally-tracked ones (guards against
+        // page refresh before the 1.5s debounce flushes deletions to Firestore).
+        const localDeletedIds = new Set(appState.deletedIds || []);
+        const deletedIds      = new Set([...cloudDeletedIds, ...localDeletedIds]);
 
         const merged = mergeResumeLists(appState.resumes, cloudResumes, deletedIds);
 

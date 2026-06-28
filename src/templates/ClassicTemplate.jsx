@@ -1,5 +1,6 @@
 import { useContext } from 'react';
-import { Mail, Phone, MapPin, Globe, Link2, Code } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe } from 'lucide-react';
+import { LinkedinIcon, GithubIcon } from '@/utils/brandIcons';
 import { getFontById } from '@/utils/fonts';
 import { HeadingStyleContext } from '@/templates/headingStyle';
 import { SectionCaseContext } from '@/templates/sectionCase';
@@ -44,8 +45,8 @@ function ContactRow({ personal, hidden, contactStyle, contactLayout, iconSize = 
     { key: 'phone',    Icon: Phone,  val: personal.phone,    display: personal.phone },
     { key: 'location', Icon: MapPin, val: personal.location, display: personal.location },
     { key: 'website',  Icon: Globe,  val: personal.website,  display: personal.websiteLabel || personal.website },
-    { key: 'linkedin', Icon: Link2,  val: personal.linkedin, display: personal.linkedinLabel || personal.linkedin },
-    { key: 'github',   Icon: Code,   val: personal.github,   display: personal.githubLabel || personal.github },
+    { key: 'linkedin', Icon: LinkedinIcon, val: personal.linkedin, display: personal.linkedinLabel || personal.linkedin },
+    { key: 'github',   Icon: GithubIcon,  val: personal.github,   display: personal.githubLabel || personal.github },
   ].filter(({ key, val }) => !hidden.has(key) && val);
 
   if (!items.length) return null;
@@ -60,7 +61,7 @@ function ContactRow({ personal, hidden, contactStyle, contactLayout, iconSize = 
       : display;
     if (contactStyle === 'icon') return (
       <span key={key} className="flex items-center gap-1.5" style={{ overflowWrap: 'anywhere' }}>
-        <Icon size={iconSize} className="shrink-0" />{label}
+        <Icon size={iconSize} strokeWidth={2} className="shrink-0" />{label}
       </span>
     );
     if (contactStyle === 'bullet') return (

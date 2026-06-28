@@ -1,5 +1,6 @@
 export const FONTS = [
-  { id: 'inter',       label: 'Inter',            family: "'Inter', sans-serif",                  googleQuery: 'Inter:wght@400;500;600;700' },
+  { id: 'notosans',   label: 'Noto Sans',         family: "'Noto Sans', sans-serif",              googleQuery: 'Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400' },
+  { id: 'inter',      label: 'Inter',             family: "'Inter', sans-serif",                  googleQuery: 'Inter:wght@400;500;600;700' },
   { id: 'opensans',   label: 'Open Sans',         family: "'Open Sans', sans-serif",              googleQuery: 'Open+Sans:ital,wght@0,400;0,600;0,700;1,400' },
   { id: 'firasans',   label: 'Fira Sans',         family: "'Fira Sans', sans-serif",              googleQuery: 'Fira+Sans:ital,wght@0,400;0,500;0,600;1,400' },
   { id: 'ibmplexsans',label: 'IBM Plex Sans',     family: "'IBM Plex Sans', sans-serif",          googleQuery: 'IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400' },
