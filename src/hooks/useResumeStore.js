@@ -6,20 +6,16 @@ import {
   defaultResumeDataDark,
   defaultResumeDataSidebar,
   defaultResumeDataExecutive,
-  SECTION_TYPE_DEFAULTS,
   ATS_DEFAULTS,
 } from '@/utils/defaultData';
+import { createSectionActions } from '@/hooks/useResumeSectionActions';
 
 const STORAGE_KEY = 'cpwtcv_v1';
 const DATA_VERSION = 6;
 
 const TEMPLATE_DEFAULTS = [
-  defaultResumeData,
-  defaultResumeDataExecutive,
-  defaultResumeDataModern,
-  defaultResumeDataMinimal,
-  defaultResumeDataDark,
-  defaultResumeDataSidebar,
+  defaultResumeData, defaultResumeDataExecutive, defaultResumeDataModern,
+  defaultResumeDataMinimal, defaultResumeDataDark, defaultResumeDataSidebar,
 ];
 
 function seedResumes() {
@@ -43,6 +39,14 @@ function loadStore() {
   return seedResumes();
 }
 
+const TEMPLATE_STYLE_DEFAULTS = {
+  executive: { headingStyle: 'underline', sectionTitleCase: 'normal' },
+  classic:   { headingStyle: 'ruled',     sectionTitleCase: 'upper' },
+  modern:    { headingStyle: 'line',      sectionTitleCase: 'upper' },
+  minimal:   { headingStyle: 'underline', sectionTitleCase: 'upper' },
+  sidebar:   { headingStyle: 'plain',     sectionTitleCase: 'upper' },
+};
+
 export function useAppStore() {
   const [appState, setAppState] = useState(loadStore);
 
@@ -65,7 +69,6 @@ export function useAppStore() {
     }));
   }
 
-  // Called by cloud sync after merging cloud + local on sign-in; clears local deletedIds
   function loadResumes(resumes) {
     setAppState(prev => ({
       ...prev,
@@ -79,24 +82,14 @@ export function useAppStore() {
 
   function createResume(name = 'Untitled Resume') {
     const id = `resume_${Date.now()}`;
-    const newResume = {
-      ...JSON.parse(JSON.stringify(defaultResumeData)),
-      id,
-      name,
-      updatedAt: Date.now(),
-      settings: { ...ATS_DEFAULTS },
-    };
+    const newResume = { ...JSON.parse(JSON.stringify(defaultResumeData)), id, name, updatedAt: Date.now(), settings: { ...ATS_DEFAULTS } };
     setAppState(prev => ({ resumes: [...prev.resumes, newResume], activeId: id }));
     return id;
   }
 
   function importResume(data) {
     const id = `resume_${Date.now()}`;
-    const imported = {
-      ...JSON.parse(JSON.stringify(data)),
-      id,
-      updatedAt: Date.now(),
-    };
+    const imported = { ...JSON.parse(JSON.stringify(data)), id, updatedAt: Date.now() };
     setAppState(prev => ({ resumes: [...prev.resumes, imported], activeId: id }));
     return id;
   }
@@ -105,12 +98,7 @@ export function useAppStore() {
     const source = appState.resumes.find(r => r.id === id);
     if (!source) return;
     const newId = `resume_${Date.now()}`;
-    const copy = {
-      ...JSON.parse(JSON.stringify(source)),
-      id: newId,
-      name: `${source.name} (Copy)`,
-      updatedAt: Date.now(),
-    };
+    const copy = { ...JSON.parse(JSON.stringify(source)), id: newId, name: `${source.name} (Copy)`, updatedAt: Date.now() };
     setAppState(prev => ({ resumes: [...prev.resumes, copy], activeId: newId }));
     return newId;
   }
@@ -120,19 +108,10 @@ export function useAppStore() {
       const remaining = prev.resumes.filter(r => r.id !== id);
       const deletedIds = [...(prev.deletedIds || []), id];
       if (!remaining.length) {
-        const newResume = {
-          ...JSON.parse(JSON.stringify(defaultResumeData)),
-          id: `resume_${Date.now()}`,
-          updatedAt: Date.now(),
-        };
+        const newResume = { ...JSON.parse(JSON.stringify(defaultResumeData)), id: `resume_${Date.now()}`, updatedAt: Date.now() };
         return { ...prev, resumes: [newResume], activeId: newResume.id, deletedIds };
       }
-      return {
-        ...prev,
-        resumes: remaining,
-        activeId: prev.activeId === id ? remaining[0].id : prev.activeId,
-        deletedIds,
-      };
+      return { ...prev, resumes: remaining, activeId: prev.activeId === id ? remaining[0].id : prev.activeId, deletedIds };
     });
   }
 
@@ -143,7 +122,7 @@ export function useAppStore() {
     }));
   }
 
-  // ── Personal Info ──────────────────────────────────────────────────
+  // ── Personal Info & Settings ───────────────────────────────────────
 
   function updatePersonal(field, value) {
     patchActive(r => ({ ...r, personal: { ...r.personal, [field]: value } }));
@@ -152,19 +131,9 @@ export function useAppStore() {
   function toggleFieldVisibility(field) {
     patchActive(r => {
       const hidden = r.personal.hiddenFields || [];
-      return {
-        ...r,
-        personal: {
-          ...r.personal,
-          hiddenFields: hidden.includes(field)
-            ? hidden.filter(f => f !== field)
-            : [...hidden, field],
-        },
-      };
+      return { ...r, personal: { ...r.personal, hiddenFields: hidden.includes(field) ? hidden.filter(f => f !== field) : [...hidden, field] } };
     });
   }
-
-  // ── Settings & Template ────────────────────────────────────────────
 
   function updateSetting(key, value) {
     patchActive(r => ({ ...r, settings: { ...(r.settings || {}), [key]: value } }));
@@ -174,92 +143,16 @@ export function useAppStore() {
     patchActive(r => ({ ...r, settings: { ...ATS_DEFAULTS } }));
   }
 
-  const TEMPLATE_STYLE_DEFAULTS = {
-    executive: { headingStyle: 'underline', sectionTitleCase: 'normal' },
-    classic: { headingStyle: 'ruled', sectionTitleCase: 'upper' },
-    modern: { headingStyle: 'line', sectionTitleCase: 'upper' },
-    minimal: { headingStyle: 'underline', sectionTitleCase: 'upper' },
-    sidebar: { headingStyle: 'plain', sectionTitleCase: 'upper' },
-  };
-
   function setTemplate(template) {
     const styleDefaults = TEMPLATE_STYLE_DEFAULTS[template] || {};
-    patchActive(r => ({
-      ...r,
-      template,
-      settings: { ...r.settings, ...styleDefaults },
-    }));
+    patchActive(r => ({ ...r, template, settings: { ...r.settings, ...styleDefaults } }));
   }
-
-  // ── Sections ───────────────────────────────────────────────────────
-
-  function updateSections(sections) {
-    patchActive(r => ({ ...r, sections }));
-  }
-
-  function updateSection(sectionId, updater) {
-    patchActive(r => ({
-      ...r,
-      sections: r.sections.map(s => s.id === sectionId ? updater(s) : s),
-    }));
-  }
-
-  function updateSectionSettings(sectionId, key, value) {
-    updateSection(sectionId, s => ({
-      ...s,
-      settings: { ...(s.settings || {}), [key]: value },
-    }));
-  }
-
-  function addSection(type) {
-    const id = `${type}_${Date.now()}`;
-    const factory = SECTION_TYPE_DEFAULTS[type] || SECTION_TYPE_DEFAULTS.custom;
-    patchActive(r => ({ ...r, sections: [...r.sections, factory(id)] }));
-  }
-
-  function removeSection(sectionId) {
-    patchActive(r => ({ ...r, sections: r.sections.filter(s => s.id !== sectionId) }));
-  }
-
-  function toggleSectionVisibility(sectionId) {
-    updateSection(sectionId, s => ({ ...s, visible: s.visible === false ? true : false }));
-  }
-
-  function addItem(sectionId, item) {
-    updateSection(sectionId, s => ({ ...s, items: [...s.items, item] }));
-  }
-
-  function updateItem(sectionId, itemId, updater) {
-    updateSection(sectionId, s => ({
-      ...s,
-      items: s.items.map(i => i.id === itemId ? updater(i) : i),
-    }));
-  }
-
-  function removeItem(sectionId, itemId) {
-    updateSection(sectionId, s => ({
-      ...s,
-      items: s.items.filter(i => i.id !== itemId),
-    }));
-  }
-
-  function reorderItems(sectionId, oldIndex, newIndex) {
-    updateSection(sectionId, s => {
-      const items = [...s.items];
-      const [removed] = items.splice(oldIndex, 1);
-      items.splice(newIndex, 0, removed);
-      return { ...s, items };
-    });
-  }
-
-  // ── Cover Letter ───────────────────────────────────────────────────
 
   function updateCoverLetter(field, value) {
-    patchActive(r => ({
-      ...r,
-      coverLetter: { ...(r.coverLetter || {}), [field]: value },
-    }));
+    patchActive(r => ({ ...r, coverLetter: { ...(r.coverLetter || {}), [field]: value } }));
   }
+
+  const sectionActions = createSectionActions(patchActive);
 
   return {
     appState,
@@ -275,17 +168,8 @@ export function useAppStore() {
     toggleFieldVisibility,
     updateSetting,
     setTemplate,
-    updateSections,
-    updateSection,
-    updateSectionSettings,
-    addSection,
-    removeSection,
-    addItem,
-    updateItem,
-    removeItem,
-    reorderItems,
     updateCoverLetter,
-    toggleSectionVisibility,
     resetSettings,
+    ...sectionActions,
   };
 }

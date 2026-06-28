@@ -1,548 +1,119 @@
-import { useContext } from 'react';
 import { Mail, Phone, MapPin, Globe } from 'lucide-react';
 import { LinkedinIcon, GithubIcon } from '@/utils/brandIcons';
 import { getFontById } from '@/utils/fonts';
 import { HeadingStyleContext } from '@/templates/headingStyle';
 import { SectionCaseContext } from '@/templates/sectionCase';
+import { ROW_GAP, photoStyle, MainTitle, SideTitle, SideContact } from '@/templates/SidebarTemplateHelpers';
+import { SideSkills, SideEducation, SideLanguages, SideCertifications, SideInterests, SideReferences } from '@/templates/SidebarTemplateSideSections';
+import { MainExperience, MainProjects, MainAwards, MainVolunteering, MainCustom } from '@/templates/SidebarTemplateMainSections';
 
-const ROW_GAP = { compact: '4px', normal: '8px', relaxed: '14px' };
-
-
-function photoStyle(settings, accent) {
-  const sh = settings?.photoShape || 'circle';
-  const sz = settings?.photoSize || 'md';
-  const br = settings?.photoBorder || 'accent';
-  const ph = settings?.photoHeight || 'match';
-  const w = sz === 'sm' ? 130 : sz === 'lg' ? 200 : 165;
-  const h = sh === 'circle' ? w : ph === 'tall' ? Math.round(w * 1.4) : ph === 'taller' ? Math.round(w * 1.8) : w;
-  return {
-    width: w + 'px',
-    height: h + 'px',
-    borderRadius: sh === 'rounded' ? '10px' : sh === 'square' ? '3px' : '50%',
-    border: br === 'none' ? 'none' : br === 'thin' ? '1.5px solid rgba(255,255,255,0.25)' : `2px solid ${accent}80`,
-    objectFit: 'cover',
-    display: 'block',
-    margin: '0 auto 12px',
-  };
-}
-
-function ItemDesc({ description, bullets, accent, textColor }) {
-  const bodyColor = textColor || '#374151';
-  return (
-    <>
-      {description && (
-        <div className="leading-relaxed mt-1 rich-text-output" style={{ color: bodyColor }} dangerouslySetInnerHTML={{ __html: description }} />
-      )}
-      {bullets?.length > 0 && (
-        <ul className="mt-1 space-y-0.5">
-          {bullets.map((b, i) => b && (
-            <li key={i} className="flex gap-1.5" style={{ color: bodyColor }}>
-              <span className="shrink-0 mt-0.5" style={{ color: accent }}>•</span>
-              {b}
-            </li>
-          ))}
-        </ul>
-      )}
-    </>
-  );
-}
-
-function MainTitle({ title, accent, borderColor }) {
-  const style = useContext(HeadingStyleContext);
-  const sectionCase = useContext(SectionCaseContext);
-  const caseClass = sectionCase === 'normal' ? '' : 'uppercase';
-  const tracking = sectionCase === 'normal' ? 'tracking-normal' : 'tracking-[0.06em]';
-  const bc = borderColor || accent || '#374151';
-  const h2 = <h2 className={`font-bold ${caseClass} ${tracking}`} style={{ color: accent, fontSize: 'var(--fs-section, 10pt)' }}>{title}</h2>;
-
-  if (style === 'plain') return <div className="mb-2">{h2}</div>;
-  if (style === 'underline') return <div className="mb-2 pb-1" style={{ borderBottom: `var(--section-border-width,1px) solid ${bc}` }}>{h2}</div>;
-  if (style === 'box') return <div className="mb-2 px-2 py-1 rounded" style={{ backgroundColor: bc + '14' }}>{h2}</div>;
-  if (style === 'ruled') {
-    return (
-      <div className="mb-2">
-        {h2}
-        <div className="mt-0.5" style={{ height: 'var(--section-border-width,1px)', backgroundColor: borderColor || '#e5e7eb' }} />
-      </div>
-    );
-  }
-  if (style === 'leftbar') {
-    return (
-      <div className="mb-2 flex items-center gap-2">
-        <div className="self-stretch shrink-0 rounded-full" style={{ width: 'var(--section-border-width,1px)', backgroundColor: bc }} />
-        {h2}
-      </div>
-    );
-  }
-  // 'line' (default)
-  return (
-    <div className="mb-2 flex items-center gap-2">
-      {h2}
-      <div className="flex-1" style={{ height: 'var(--section-border-width,1px)', backgroundColor: borderColor || '#e5e7eb' }} />
-    </div>
-  );
-}
-
-function SideTitle({ title }) {
-  return (
-    <div className="mb-2">
-      <h2 className="font-bold uppercase tracking-[0.12em] mb-1" style={{ color: '#94a3b8', fontSize: '9px' }}>{title}</h2>
-      <div className="h-px" style={{ backgroundColor: '#334155' }} />
-    </div>
-  );
-}
+const SIDEBAR_TYPES = new Set(['skills', 'education', 'languages', 'certifications', 'interests', 'references']);
 
 export default function SidebarTemplate({ data }) {
   const { personal, sections } = data;
-  const fontFamily = data.settings?.customFont || getFontById(data.settings?.font)?.family || "'Inter', sans-serif";
-  const accent        = data.settings?.accentColor      || '#2563eb';
-  const textColor     = data.settings?.textColor        || '#1e293b';
-  const sidebarBg     = data.settings?.sidebarBg        || '#1e293b';
-  const headerText    = data.settings?.headerTextColor  || '#ffffff';
-  const nameColor     = data.settings?.nameColor        || headerText;
-  const jobTitleColor = data.settings?.jobTitleColor    || accent;
-  const borderColor   = data.settings?.sectionBorderColor || '';
+  const st = data.settings || {};
+  const fontFamily    = st.customFont || getFontById(st.font)?.family || "'Inter', sans-serif";
+  const accent        = st.accentColor        || '#2563eb';
+  const textColor     = st.textColor          || '#1e293b';
+  const sidebarBg     = st.sidebarBg          || '#1e293b';
+  const headerText    = st.headerTextColor    || '#ffffff';
+  const nameColor     = st.nameColor          || headerText;
+  const jobTitleColor = st.jobTitleColor      || accent;
+  const borderColor   = st.sectionBorderColor || '';
   const hidden = new Set(personal?.hiddenFields || []);
 
-  const baseSize    = data.settings?.fontSizeBase || 11;
-  const nameSize    = baseSize + (data.settings?.fontSizeNameDelta ?? 8);
-  const sectionSize = baseSize + (data.settings?.fontSizeSectionDelta ?? 1);
-  const entrySize   = baseSize + (data.settings?.fontSizeEntryDelta ?? 0);
+  const baseSize    = st.fontSizeBase || 11;
+  const nameSize    = baseSize + (st.fontSizeNameDelta    ?? 8);
+  const sectionSize = baseSize + (st.fontSizeSectionDelta ?? 1);
+  const entrySize   = baseSize + (st.fontSizeEntryDelta   ?? 0);
 
-  const SIDEBAR_TYPES = new Set(['skills', 'education', 'languages', 'certifications', 'interests', 'references']);
   const visibleSections = sections.filter(s => s.visible !== false);
-  const sidebarSections = visibleSections.filter(s => SIDEBAR_TYPES.has(s.type));
-  const mainSections = visibleSections.filter(s => !SIDEBAR_TYPES.has(s.type));
+  const sidebarSections = visibleSections.filter(s =>  SIDEBAR_TYPES.has(s.type));
+  const mainSections    = visibleSections.filter(s => !SIDEBAR_TYPES.has(s.type));
+
+  const cp = { iconSize: st.iconSize ?? 8, accent, personal };
+
+  function applySpacing(ss) {
+    const ov = {};
+    if (ss.spaceBefore != null) ov.marginTop = ss.spaceBefore + 'px';
+    if (ss.spaceAfter  != null) ov['--section-gap'] = ss.spaceAfter + 'px';
+    if (ss.itemGap     != null) ov['--item-gap']    = ss.itemGap + 'px';
+    else if (ss.spacing)        ov['--item-gap']    = ROW_GAP[ss.spacing] || ROW_GAP.normal;
+    return ov;
+  }
 
   function renderSide(section) {
     switch (section.type) {
       case 'skills':         return <SideSkills         key={section.id} section={section} accent={accent} />;
-      case 'education':      return <SideEducation      key={section.id} section={section} accent={accent} />;
-      case 'languages':      return <SideLanguages      key={section.id} section={section} accent={accent} />;
-      case 'certifications': return <SideCertifications key={section.id} section={section} accent={accent} />;
-      case 'interests':      return <SideInterests      key={section.id} section={section} accent={accent} />;
-      case 'references':     return <SideReferences     key={section.id} section={section} accent={accent} />;
+      case 'education':      return <SideEducation      key={section.id} section={section} />;
+      case 'languages':      return <SideLanguages      key={section.id} section={section} />;
+      case 'certifications': return <SideCertifications key={section.id} section={section} />;
+      case 'interests':      return <SideInterests      key={section.id} section={section} />;
+      case 'references':     return <SideReferences     key={section.id} section={section} />;
       default:               return null;
     }
   }
 
   function renderMain(section) {
+    const props = { key: section.id, section, accent, borderColor, textColor };
     switch (section.type) {
-      case 'experience':   return <MainExperience   key={section.id} section={section} accent={accent} borderColor={borderColor} textColor={textColor} />;
-      case 'projects':     return <MainProjects     key={section.id} section={section} accent={accent} borderColor={borderColor} textColor={textColor} />;
-      case 'awards':       return <MainAwards       key={section.id} section={section} accent={accent} borderColor={borderColor} textColor={textColor} />;
-      case 'volunteering': return <MainVolunteering key={section.id} section={section} accent={accent} borderColor={borderColor} textColor={textColor} />;
-      default:             return <MainCustom       key={section.id} section={section} accent={accent} borderColor={borderColor} textColor={textColor} />;
+      case 'experience':   return <MainExperience   {...props} />;
+      case 'projects':     return <MainProjects     {...props} />;
+      case 'awards':       return <MainAwards       {...props} />;
+      case 'volunteering': return <MainVolunteering {...props} />;
+      default:             return <MainCustom       {...props} />;
     }
   }
 
+  const cssVars = {
+    fontFamily, color: textColor, fontSize: baseSize + 'pt',
+    lineHeight: st.lineHeightValue ?? 1.5, minHeight: '100%',
+    '--fs-base': baseSize + 'pt', '--fs-name': nameSize + 'pt',
+    '--fs-section': sectionSize + 'pt', '--fs-entry': entrySize + 'pt',
+    '--section-gap': (st.sectionGap ?? 16) + 'px', '--item-gap': (st.itemGap ?? 12) + 'px',
+    '--section-border-width': (st.sectionBorderWidth ?? 1) + 'px',
+  };
+
   return (
-    <SectionCaseContext.Provider value={data.settings?.sectionTitleCase || 'upper'}>
-    <HeadingStyleContext.Provider value={data.settings?.headingStyle || 'line'}>
-    <div className="flex" style={{ fontFamily, color: textColor, fontSize: baseSize + 'pt', lineHeight: data.settings?.lineHeightValue ?? 1.5, minHeight: '100%', '--fs-base': baseSize + 'pt', '--fs-name': nameSize + 'pt', '--fs-section': sectionSize + 'pt', '--fs-entry': entrySize + 'pt', '--section-gap': (data.settings?.sectionGap ?? 16) + 'px', '--item-gap': (data.settings?.itemGap ?? 12) + 'px', '--section-border-width': (data.settings?.sectionBorderWidth ?? 1) + 'px' }}>
-      {/* Sidebar */}
+    <SectionCaseContext.Provider value={st.sectionTitleCase || 'upper'}>
+    <HeadingStyleContext.Provider value={st.headingStyle || 'line'}>
+    <div className="flex" style={cssVars}>
       <div className="w-[38%] shrink-0 px-4 py-5" style={{ backgroundColor: sidebarBg, color: '#e2e8f0' }}>
-        {/* Avatar + Name */}
         <div className="mb-5 text-center">
           {personal.photo && !hidden.has('photo') && (
-            <img src={personal.photo} alt="" style={photoStyle(data.settings, accent)} />
+            <img src={personal.photo} alt="" style={photoStyle(st, accent)} />
           )}
           <h1 className="font-bold leading-tight" style={{ color: nameColor, fontSize: 'var(--fs-name, 19pt)' }}>{personal.name || 'Your Name'}</h1>
           {personal.title && <p className="mt-0.5" style={{ color: jobTitleColor, fontSize: 'var(--fs-entry, 10pt)' }}>{personal.title}</p>}
         </div>
-
-        {/* Contact */}
         <div style={{ marginBottom: 'var(--section-gap)' }}>
           <SideTitle title="Contact" />
           <div className="space-y-1.5">
-            {!hidden.has('email')    && personal.email    && <SideContact icon={Mail}   ckey="email"    label="Email"    text={personal.email}    iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
-            {!hidden.has('phone')    && personal.phone    && <SideContact icon={Phone}  ckey="phone"    label="Phone"    text={personal.phone}    iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
-            {!hidden.has('location') && personal.location && <SideContact icon={MapPin} ckey="location" label="Location" text={personal.location} iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
-            {!hidden.has('website')  && personal.website  && <SideContact icon={Globe}  ckey="website"  label="Website"  text={personal.website}  display={personal.websiteLabel || personal.website}  iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
-            {!hidden.has('linkedin') && personal.linkedin && <SideContact icon={LinkedinIcon} ckey="linkedin" label="LinkedIn" text={personal.linkedin} display={personal.linkedinLabel || personal.linkedin} iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
-            {!hidden.has('github')   && personal.github   && <SideContact icon={GithubIcon}  ckey="github"   label="GitHub"   text={personal.github}   display={personal.githubLabel || personal.github}   iconSize={data.settings?.iconSize ?? 8} accent={accent} personal={personal} />}
+            {!hidden.has('email')    && personal.email    && <SideContact icon={Mail}         ckey="email"    label="Email"    text={personal.email}    {...cp} />}
+            {!hidden.has('phone')    && personal.phone    && <SideContact icon={Phone}        ckey="phone"    label="Phone"    text={personal.phone}    {...cp} />}
+            {!hidden.has('location') && personal.location && <SideContact icon={MapPin}       ckey="location" label="Location" text={personal.location} {...cp} />}
+            {!hidden.has('website')  && personal.website  && <SideContact icon={Globe}        ckey="website"  label="Website"  text={personal.website}  display={personal.websiteLabel  || personal.website}  {...cp} />}
+            {!hidden.has('linkedin') && personal.linkedin && <SideContact icon={LinkedinIcon} ckey="linkedin" label="LinkedIn" text={personal.linkedin} display={personal.linkedinLabel || personal.linkedin} {...cp} />}
+            {!hidden.has('github')   && personal.github   && <SideContact icon={GithubIcon}   ckey="github"   label="GitHub"   text={personal.github}   display={personal.githubLabel  || personal.github}   {...cp} />}
           </div>
         </div>
-
-        {sidebarSections.map(section => {
-          const ss = section.settings || {};
-          const ov = {};
-          if (ss.spaceBefore != null) ov.marginTop = ss.spaceBefore + 'px';
-          if (ss.spaceAfter  != null) ov['--section-gap'] = ss.spaceAfter + 'px';
-          if (ss.itemGap     != null) ov['--item-gap']    = ss.itemGap    + 'px';
-          else if (ss.spacing)        ov['--item-gap']    = ROW_GAP[ss.spacing] || ROW_GAP.normal;
-          return <div key={section.id} style={ov}>{renderSide(section)}</div>;
-        })}
+        {sidebarSections.map(section => (
+          <div key={section.id} style={applySpacing(section.settings || {})}>{renderSide(section)}</div>
+        ))}
       </div>
-
-      {/* Main */}
       <div className="flex-1 px-5 py-5" style={{ color: textColor }}>
         {!hidden.has('summary') && personal.summary && personal.summary.replace(/<[^>]*>/g, '').trim() && (
           <div style={{ marginBottom: 'var(--section-gap)' }}>
             <MainTitle title="About Me" accent={accent} borderColor={borderColor} />
-            <div
-              className="leading-relaxed rich-text-output"
-              style={{ color: textColor }}
-              dangerouslySetInnerHTML={{ __html: personal.summary }}
-            />
+            <div className="leading-relaxed rich-text-output" style={{ color: textColor }} dangerouslySetInnerHTML={{ __html: personal.summary }} />
           </div>
         )}
-        {mainSections.map(section => {
-          const ss = section.settings || {};
-          const ov = {};
-          if (ss.spaceBefore != null) ov.marginTop = ss.spaceBefore + 'px';
-          if (ss.spaceAfter  != null) ov['--section-gap'] = ss.spaceAfter + 'px';
-          if (ss.itemGap     != null) ov['--item-gap']    = ss.itemGap    + 'px';
-          else if (ss.spacing)        ov['--item-gap']    = ROW_GAP[ss.spacing] || ROW_GAP.normal;
-          return <div key={section.id} style={ov}>{renderMain(section)}</div>;
-        })}
+        {mainSections.map(section => (
+          <div key={section.id} style={applySpacing(section.settings || {})}>{renderMain(section)}</div>
+        ))}
       </div>
     </div>
     </HeadingStyleContext.Provider>
     </SectionCaseContext.Provider>
-  );
-}
-
-function contactHref(key, val, personal) {
-  if (key === 'email') return `mailto:${val}`;
-  if (key === 'phone') return `tel:${val.replace(/\s/g, '')}`;
-  if (key === 'website' || key === 'linkedin' || key === 'github') {
-    const urlOverride = personal?.[key + 'Url'];
-    const url = urlOverride || val;
-    return url.startsWith('http') ? url : `https://${url}`;
-  }
-  return null;
-}
-
-function SideContact({ icon: Icon, label, text, display, ckey, iconSize = 8, accent, personal }) {
-  const href = contactHref(ckey, text, personal);
-  return (
-    <div>
-      <div className="flex items-center gap-1" style={{ color: '#94a3b8', fontSize: '9px' }}>
-        <Icon size={iconSize} strokeWidth={2} />
-        <span className="uppercase tracking-wider font-bold">{label}</span>
-      </div>
-      <div style={{ color: '#cbd5e1', fontSize: '10px', wordBreak: 'break-all' }}>
-        {href ? <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>{display || text}</a> : (display || text)}
-      </div>
-    </div>
-  );
-}
-
-function SideSkills({ section, accent }) {
-  const visibleItems = section.items.filter(i => i.visible !== false);
-  const style = section.settings?.skillsStyle || 'tags';
-  return (
-    <div style={{ marginBottom: 'var(--section-gap)' }}>
-      <SideTitle title={section.title} />
-      {style === 'tags' ? (
-        <div className="flex flex-col" style={{ gap: 'var(--item-gap)' }}>
-          {visibleItems.map(item => {
-            const iH = item.hiddenFields || [];
-            return (
-              <div key={item.id}>
-                {item.category && !iH.includes('category') && <div className="font-bold uppercase tracking-wider mb-0.5" style={{ color: '#64748b', fontSize: '9px' }}>{item.category}</div>}
-                {item.skills && !iH.includes('skills') && (
-                  <div className="flex flex-wrap gap-0.5">
-                    {item.skills.split(',').map((sk, i) => sk.trim() && (
-                      <span key={i} className="px-1.5 py-0.5 rounded text-[9px] font-medium" style={{ backgroundColor: '#334155', color: '#cbd5e1' }}>
-                        {sk.trim()}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ) : style === 'bars' ? (
-        <div className="flex flex-col" style={{ gap: 'var(--item-gap)' }}>
-          {visibleItems.map(item => {
-            const iH = item.hiddenFields || [];
-            return (
-              <div key={item.id}>
-                {item.category && !iH.includes('category') && <div className="font-bold uppercase tracking-wider mb-0.5" style={{ color: '#64748b', fontSize: '9px' }}>{item.category}</div>}
-                {item.skills && !iH.includes('skills') && item.skills.split(',').map((sk, i) => sk.trim() && (
-                  <div key={i} className="mb-1">
-                    <div className="text-[10px] mb-0.5" style={{ color: '#cbd5e1' }}>{sk.trim()}</div>
-                    <div className="h-1 rounded-full" style={{ backgroundColor: '#334155' }}>
-                      <div className="h-1 rounded-full w-4/5" style={{ backgroundColor: accent + '80' }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="flex flex-col" style={{ gap: 'var(--item-gap)' }}>
-          {visibleItems.map(item => {
-            const iH = item.hiddenFields || [];
-            return (
-              <div key={item.id}>
-                {item.category && !iH.includes('category') && <span className="font-bold text-[9px] uppercase mr-1" style={{ color: '#64748b' }}>{item.category}: </span>}
-                {item.skills && !iH.includes('skills') && <span className="text-[10px]" style={{ color: '#cbd5e1' }}>{item.skills}</span>}
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SideEducation({ section, accent }) {
-  const showDates = section.settings?.showDates !== false;
-  const visibleItems = section.items.filter(i => i.visible !== false);
-  return (
-    <div style={{ marginBottom: 'var(--section-gap)' }}>
-      <SideTitle title={section.title} />
-      <div className="flex flex-col" style={{ gap: 'var(--item-gap)' }}>
-        {visibleItems.map(item => (
-          <div key={item.id}>
-            <div className="font-semibold text-[11px]" style={{ color: '#e2e8f0' }}>{item.degree}</div>
-            {item.institution && <div className="text-[10px]" style={{ color: '#94a3b8' }}>{item.institution}</div>}
-            {item.gpa && <div className="text-[10px]" style={{ color: '#64748b' }}>GPA: {item.gpa}</div>}
-            {showDates && (item.startDate || item.endDate) && (
-              <div className="text-[10px]" style={{ color: '#64748b' }}>
-                {item.startDate}{item.endDate ? ` – ${item.endDate}` : ''}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SideLanguages({ section }) {
-  const visibleItems = section.items.filter(i => i.visible !== false);
-  return (
-    <div style={{ marginBottom: 'var(--section-gap)' }}>
-      <SideTitle title={section.title} />
-      <div className="flex flex-col" style={{ gap: 'var(--item-gap)' }}>
-        {visibleItems.map(item => (
-          <div key={item.id} className="flex justify-between">
-            <span className="text-[10px]" style={{ color: '#e2e8f0' }}>{item.language}</span>
-            <span className="text-[10px]" style={{ color: '#64748b' }}>{item.proficiency}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SideCertifications({ section }) {
-  const showDates = section.settings?.showDates !== false;
-  const visibleItems = section.items.filter(i => i.visible !== false);
-  return (
-    <div style={{ marginBottom: 'var(--section-gap)' }}>
-      <SideTitle title={section.title} />
-      <div className="flex flex-col" style={{ gap: 'var(--item-gap)' }}>
-        {visibleItems.map(item => (
-          <div key={item.id}>
-            <div className="font-semibold text-[10px]" style={{ color: '#e2e8f0' }}>{item.name}</div>
-            {item.issuer && <div className="text-[10px]" style={{ color: '#94a3b8' }}>{item.issuer}</div>}
-            {showDates && item.date && <div className="text-[10px]" style={{ color: '#64748b' }}>{item.date}</div>}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SideInterests({ section }) {
-  const visibleItems = section.items.filter(i => i.visible !== false);
-  return (
-    <div style={{ marginBottom: 'var(--section-gap)' }}>
-      <SideTitle title={section.title} />
-      <div className="flex flex-wrap gap-0.5">
-        {visibleItems.map(item =>
-          (item.interests || '').split(',').map((interest, i) => interest.trim() && (
-            <span key={`${item.id}-${i}`} className="px-1.5 py-0.5 rounded text-[9px]" style={{ backgroundColor: '#334155', color: '#cbd5e1' }}>
-              {interest.trim()}
-            </span>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
-function SideReferences({ section }) {
-  const visibleItems = section.items.filter(i => i.visible !== false);
-  return (
-    <div style={{ marginBottom: 'var(--section-gap)' }}>
-      <SideTitle title={section.title} />
-      <div className="flex flex-col" style={{ gap: 'var(--item-gap)' }}>
-        {visibleItems.map(item => (
-          <div key={item.id}>
-            <div className="font-semibold text-[10px]" style={{ color: '#e2e8f0' }}>{item.name}</div>
-            {item.jobTitle && <div className="text-[10px]" style={{ color: '#94a3b8' }}>{item.jobTitle}</div>}
-            {item.email && <div className="text-[10px]" style={{ color: '#64748b' }}>{item.email}</div>}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function MainExperience({ section, accent, borderColor, textColor }) {
-  const s = section.settings || {};
-  const twoCol = s.columns > 1;
-  const showDates = s.showDates !== false;
-  const showLoc = s.showLocation !== false;
-  const titleOrder = s.titleOrder || 'role';
-  const visibleItems = section.items.filter(i => i.visible !== false);
-  return (
-    <div style={{ marginBottom: 'var(--section-gap)' }}>
-      <MainTitle title={section.title} accent={accent} borderColor={borderColor} />
-      <div className={twoCol ? 'grid grid-cols-2' : 'flex flex-col'} style={{ gap: 'var(--item-gap)' }}>
-        {visibleItems.map(item => {
-          const iH = new Set(item.hiddenFields || []);
-          const company = iH.has('company') ? '' : item.company;
-          const role = iH.has('role') ? '' : item.role;
-          const loc = (!iH.has('location') && showLoc && item.location) ? item.location : null;
-          const sd = iH.has('startDate') ? '' : (item.startDate || '');
-          const ed = iH.has('endDate') ? '' : (item.current ? 'Present' : (item.endDate || ''));
-          const dateStr = showDates && (sd || ed) ? `${sd}${ed ? ` – ${ed}` : ''}` : '';
-          const primaryTitle = titleOrder === 'role' ? role : company;
-          const secondaryTitle = titleOrder === 'role' ? company : role;
-          const desc = iH.has('description') ? '' : item.description;
-          return (
-            <div key={item.id} className="relative pl-3" style={{ borderLeft: `2px solid #e5e7eb` }}>
-              <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full" style={{ backgroundColor: '#9ca3af' }} />
-              <div className="flex justify-between items-start">
-                <div>
-                  {primaryTitle && <div className="font-semibold" style={{ color: textColor, fontSize: 'var(--fs-entry, 11pt)' }}>{primaryTitle}</div>}
-                  {secondaryTitle && (
-                    <div style={{ color: accent, opacity: 0.8, fontSize: '10px' }}>
-                      {secondaryTitle}{loc ? ` · ${loc}` : ''}
-                    </div>
-                  )}
-                </div>
-                {dateStr && <span className="whitespace-nowrap ml-2 shrink-0" style={{ color: '#9ca3af', fontSize: '10px' }}>{dateStr}</span>}
-              </div>
-              {desc && <ItemDesc description={desc} bullets={item.bullets} accent={accent} textColor={textColor} />}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function MainProjects({ section, accent, borderColor, textColor }) {
-  const s = section.settings || {};
-  const twoCol = s.columns > 1;
-  const showDates = s.showDates !== false;
-  const visibleItems = section.items.filter(i => i.visible !== false);
-  return (
-    <div style={{ marginBottom: 'var(--section-gap)' }}>
-      <MainTitle title={section.title} accent={accent} borderColor={borderColor} />
-      <div className={twoCol ? 'grid grid-cols-2' : 'flex flex-col'} style={{ gap: 'var(--item-gap)' }}>
-        {visibleItems.map(item => (
-          <div key={item.id} className="relative pl-3" style={{ borderLeft: `2px solid #e5e7eb` }}>
-            <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full" style={{ backgroundColor: '#9ca3af' }} />
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="font-semibold" style={{ color: textColor, fontSize: 'var(--fs-entry, 11pt)' }}>{item.name}</span>
-                {item.technologies && <span style={{ color: accent, opacity: 0.7, fontSize: '10px' }}> · {item.technologies}</span>}
-              </div>
-              {showDates && (item.startDate || item.endDate) && (
-                <span className="whitespace-nowrap ml-2 shrink-0" style={{ color: '#9ca3af', fontSize: '10px' }}>
-                  {item.startDate}{item.endDate ? ` – ${item.endDate}` : ''}
-                </span>
-              )}
-            </div>
-            {item.url && <div style={{ color: accent, fontSize: '10px' }}>{item.url}</div>}
-            <ItemDesc description={item.description} bullets={item.bullets} accent={accent} textColor={textColor} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function MainAwards({ section, accent, borderColor, textColor }) {
-  const showDates = section.settings?.showDates !== false;
-  const visibleItems = section.items.filter(i => i.visible !== false);
-  return (
-    <div style={{ marginBottom: 'var(--section-gap)' }}>
-      <MainTitle title={section.title} accent={accent} borderColor={borderColor} />
-      <div className="flex flex-col" style={{ gap: 'var(--item-gap)' }}>
-        {visibleItems.map(item => (
-          <div key={item.id}>
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="font-semibold" style={{ color: textColor, fontSize: 'var(--fs-entry, 11pt)' }}>{item.title}</span>
-                {item.issuer && <span style={{ color: accent, opacity: 0.7, fontSize: '10px' }}> — {item.issuer}</span>}
-              </div>
-              {showDates && item.date && <span className="whitespace-nowrap ml-2 shrink-0" style={{ color: '#9ca3af', fontSize: '10px' }}>{item.date}</span>}
-            </div>
-            {item.description && <p className="mt-0.5" style={{ opacity: 0.75, fontSize: '10.5px' }}>{item.description}</p>}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function MainVolunteering({ section, accent, borderColor, textColor }) {
-  const s = section.settings || {};
-  const showDates = s.showDates !== false;
-  const showLoc = s.showLocation !== false;
-  const visibleItems = section.items.filter(i => i.visible !== false);
-  return (
-    <div style={{ marginBottom: 'var(--section-gap)' }}>
-      <MainTitle title={section.title} accent={accent} borderColor={borderColor} />
-      <div className="flex flex-col" style={{ gap: 'var(--item-gap)' }}>
-        {visibleItems.map(item => (
-          <div key={item.id}>
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="font-semibold" style={{ color: textColor, fontSize: 'var(--fs-entry, 11pt)' }}>{item.role}</span>
-                {item.org && <span style={{ color: accent, opacity: 0.85 }}> — {item.org}</span>}
-                {showLoc && item.location && <span style={{ opacity: 0.5 }}>, {item.location}</span>}
-              </div>
-              {showDates && (item.startDate || item.endDate) && (
-                <span className="whitespace-nowrap ml-2 shrink-0" style={{ color: '#9ca3af', fontSize: '10px' }}>
-                  {item.startDate}{item.endDate ? ` – ${item.endDate}` : ''}
-                </span>
-              )}
-            </div>
-            <ItemDesc description={item.description} bullets={item.bullets} accent={accent} textColor={textColor} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function MainCustom({ section, accent, borderColor, textColor }) {
-  const s = section.settings || {};
-  const twoCol = s.columns > 1;
-  const visibleItems = section.items.filter(i => i.visible !== false);
-  return (
-    <div style={{ marginBottom: 'var(--section-gap)' }}>
-      <MainTitle title={section.title} accent={accent} borderColor={borderColor} />
-      <div className={twoCol ? 'grid grid-cols-2' : 'flex flex-col'} style={{ gap: 'var(--item-gap)' }}>
-        {visibleItems.map(item => (
-          <div key={item.id}>
-            <div className="flex justify-between items-start">
-              <div>
-                {item.title && <span className="font-semibold" style={{ color: textColor, fontSize: 'var(--fs-entry, 11pt)' }}>{item.title}</span>}
-                {item.subtitle && <span style={{ color: accent, opacity: 0.85 }}> — {item.subtitle}</span>}
-              </div>
-              <div className="text-right whitespace-nowrap ml-2 shrink-0" style={{ color: '#9ca3af', fontSize: '10px' }}>
-                {item.location && <div>{item.location}</div>}
-                {item.date && <div>{item.date}</div>}
-              </div>
-            </div>
-            <ItemDesc description={item.description} bullets={item.bullets} accent={accent} textColor={textColor} />
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
