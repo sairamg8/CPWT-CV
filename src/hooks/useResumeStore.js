@@ -10,7 +10,7 @@ import {
 } from '@/utils/defaultData';
 
 const STORAGE_KEY = 'cpwtcv_v1';
-const DATA_VERSION = 3;
+const DATA_VERSION = 4;
 
 const TEMPLATE_DEFAULTS = [
   defaultResumeData,
@@ -27,7 +27,7 @@ function seedResumes() {
     id: `resume_${now + i}`,
     updatedAt: now,
   }));
-  return { resumes, activeId: resumes[0].id, dataVersion: DATA_VERSION };
+  return { resumes, activeId: resumes[0].id, dataVersion: DATA_VERSION, deletedIds: [] };
 }
 const DATA_VERSION = 5;
 

@@ -250,7 +250,8 @@ export const defaultResumeData = {
   template: 'classic',
   settings: {
     ...ATS_DEFAULTS,
-    accentColor: '#1a1a1a',
+    accentColor: '#111111',
+    textColor: '#111111',
     headingStyle: 'ruled',
     headerAlign: 'left',
   },
