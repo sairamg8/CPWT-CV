@@ -40,6 +40,9 @@ function ContactItems({ personal }) {
 
 function ExperienceItem({ item, settings }) {
   const accent = settings?.accentColor || '#111111';
+  const startD = item.startDate || item.start || '';
+  const endD   = item.current ? 'Present' : (item.endDate || item.end || '');
+  const dateStr = startD && endD ? `${startD} – ${endD}` : (endD || startD);
   return (
     <View style={s.entryWrap} wrap={false}>
       <View style={s.entryRow}>
@@ -51,9 +54,7 @@ function ExperienceItem({ item, settings }) {
             </Text>
           )}
         </View>
-        <Text style={s.entryDate}>
-          {item.start}{item.end ? ` – ${item.end}` : ' – Present'}
-        </Text>
+        {dateStr ? <Text style={s.entryDate}>{dateStr}</Text> : null}
       </View>
       {item.description && <PdfRichText html={item.description} style={s.body} />}
     </View>
@@ -100,23 +101,25 @@ function SectionRouter({ section, settings }) {
     return (
       <View style={s.section}>
         <PdfSectionTitle {...titleProps} />
-        {section.items?.map((item, i) => (
-          <View key={i} style={{ marginBottom: 6 }} wrap={false}>
-            <View style={s.entryRow}>
-              <Text style={s.entryTitle}>{item.institution || item.school}</Text>
-              {(item.start || item.end) && (
-                <Text style={s.entryDate}>
-                  {item.start}{item.end ? ` – ${item.end}` : ''}
+        {section.items?.map((item, i) => {
+          const sd = item.startDate || item.start || '';
+          const ed = item.endDate   || item.end   || '';
+          const dateStr = sd && ed ? `${sd} – ${ed}` : (ed || sd);
+          const fieldOfStudy = item.fieldOfStudy || item.field || '';
+          return (
+            <View key={i} style={{ marginBottom: 6 }} wrap={false}>
+              <View style={s.entryRow}>
+                <Text style={s.entryTitle}>{item.institution || item.school}</Text>
+                {dateStr ? <Text style={s.entryDate}>{dateStr}</Text> : null}
+              </View>
+              {item.degree && (
+                <Text style={s.entryMeta}>
+                  {item.degree}{fieldOfStudy ? `, ${fieldOfStudy}` : ''}
                 </Text>
               )}
             </View>
-            {item.degree && (
-              <Text style={s.entryMeta}>
-                {item.degree}{item.field ? `, ${item.field}` : ''}
-              </Text>
-            )}
-          </View>
-        ))}
+          );
+        })}
       </View>
     );
   }
