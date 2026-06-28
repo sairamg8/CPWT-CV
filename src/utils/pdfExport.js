@@ -33,7 +33,8 @@ function computeRanges(contentEl, pageContentPx) {
   while (i < leaves.length && ranges.length < 40) {
     const limit = start + pageContentPx;
     let j = i;
-    while (j < leaves.length && leaves[j].bottom <= limit + 0.5) j++;
+    // 2px tolerance absorbs sub-pixel rendering differences that push leaves just past a page boundary
+    while (j < leaves.length && leaves[j].bottom <= limit + 2) j++;
     if (j === i) {
       ranges.push({ start, height: pageContentPx });
       start += pageContentPx;
@@ -46,6 +47,20 @@ function computeRanges(contentEl, pageContentPx) {
     }
   }
   if (start < total - 1) ranges.push({ start, height: total - start });
+
+  // Collapse a near-empty trailing page into the previous to prevent blank last pages.
+  // Triggered when a leaf barely overflows a page boundary (section margins, sub-pixel layout).
+  // Only collapses if the tail content fits within 4px of the available room on the prior page.
+  if (ranges.length > 1) {
+    const last = ranges[ranges.length - 1];
+    const prev = ranges[ranges.length - 2];
+    const room = pageContentPx - (last.start - prev.start);
+    if (room > 0 && last.height <= room + 4) {
+      prev.height = last.start + last.height - prev.start;
+      ranges.pop();
+    }
+  }
+
   return ranges;
 }
 
