@@ -10,7 +10,7 @@ import {
 } from '@/utils/defaultData';
 
 const STORAGE_KEY = 'cpwtcv_v1';
-const DATA_VERSION = 3;
+const DATA_VERSION = 4;
 
 const TEMPLATE_DEFAULTS = [
   defaultResumeData,
@@ -27,7 +27,7 @@ function seedResumes() {
     id: `resume_${now + i}`,
     updatedAt: now,
   }));
-  return { resumes, activeId: resumes[0].id, dataVersion: DATA_VERSION };
+  return { resumes, activeId: resumes[0].id, dataVersion: DATA_VERSION, deletedIds: [] };
 }
 
 function loadStore() {
@@ -63,11 +63,13 @@ export function useAppStore() {
     }));
   }
 
-  // Called by cloud sync after merging cloud + local on sign-in
+  // Called by cloud sync after merging cloud + local on sign-in; clears local deletedIds
   function loadResumes(resumes) {
     setAppState(prev => ({
+      ...prev,
       resumes,
       activeId: resumes.find(r => r.id === prev.activeId) ? prev.activeId : (resumes[0]?.id || prev.activeId),
+      deletedIds: [],
     }));
   }
 
@@ -114,17 +116,20 @@ export function useAppStore() {
   function deleteResume(id) {
     setAppState(prev => {
       const remaining = prev.resumes.filter(r => r.id !== id);
+      const deletedIds = [...(prev.deletedIds || []), id];
       if (!remaining.length) {
         const newResume = {
           ...JSON.parse(JSON.stringify(defaultResumeData)),
           id: `resume_${Date.now()}`,
           updatedAt: Date.now(),
         };
-        return { resumes: [newResume], activeId: newResume.id };
+        return { ...prev, resumes: [newResume], activeId: newResume.id, deletedIds };
       }
       return {
+        ...prev,
         resumes: remaining,
         activeId: prev.activeId === id ? remaining[0].id : prev.activeId,
+        deletedIds,
       };
     });
   }
