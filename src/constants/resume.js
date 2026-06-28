@@ -2,12 +2,14 @@ import ClassicTemplate from '@/templates/ClassicTemplate';
 import ModernTemplate from '@/templates/ModernTemplate';
 import MinimalTemplate from '@/templates/MinimalTemplate';
 import SidebarTemplate from '@/templates/SidebarTemplate';
+import ExecutiveTemplate from '@/templates/ExecutiveTemplate';
 
 export const TEMPLATE_MAP = {
-  classic: ClassicTemplate,
-  modern:  ModernTemplate,
-  minimal: MinimalTemplate,
-  sidebar: SidebarTemplate,
+  classic:   ClassicTemplate,
+  modern:    ModernTemplate,
+  minimal:   MinimalTemplate,
+  sidebar:   SidebarTemplate,
+  executive: ExecutiveTemplate,
 };
 
 export const SECTION_GROUPS = [

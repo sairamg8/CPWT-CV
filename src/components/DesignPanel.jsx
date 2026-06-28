@@ -4,10 +4,11 @@ import { FONTS, getFontById, loadGoogleFont, loadCustomGoogleFont, loadCustomFon
 import { ATS_DEFAULTS } from '@/utils/defaultData';
 
 const TEMPLATES = [
-  { id: 'classic', label: 'Classic', desc: 'ATS-friendly · Two-column header', ats: true },
-  { id: 'modern',  label: 'Modern',  desc: 'Bold accent header · Full-width layout' },
-  { id: 'minimal', label: 'Minimal', desc: 'ATS-friendly · Clean & whitespace-first', ats: true },
-  { id: 'sidebar', label: 'Sidebar', desc: 'Colored left sidebar layout' },
+  { id: 'executive', label: 'Executive', desc: 'ATS-friendly · Clean accent headings · Vibrant', ats: true },
+  { id: 'classic',   label: 'Classic',   desc: 'ATS-friendly · Two-column header', ats: true },
+  { id: 'modern',    label: 'Modern',    desc: 'Bold accent header · Full-width layout' },
+  { id: 'minimal',   label: 'Minimal',   desc: 'ATS-friendly · Clean & whitespace-first', ats: true },
+  { id: 'sidebar',   label: 'Sidebar',   desc: 'Colored left sidebar layout' },
 ];
 
 const ACCENT_PRESETS = [

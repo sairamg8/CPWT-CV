@@ -541,6 +541,29 @@ export const dummyResumeData = {
 
 // Factory functions to create a fresh empty section of each type.
 // Each factory seeds one blank item so the section title appears in the canvas immediately.
+
+// ── Executive Template — ATS-friendly, accent headings, vibrant ───────────────
+
+export const defaultResumeDataExecutive = {
+  ...defaultResumeData,
+  id: 'resume_executive',
+  name: 'Executive',
+  updatedAt: Date.now(),
+  template: 'executive',
+  settings: {
+    ...ATS_DEFAULTS,
+    accentColor: '#2563eb',
+    textColor: '#111111',
+    headingStyle: 'underline',
+    sectionTitleCase: 'normal',
+    contactStyle: 'icon',
+    contactLayout: 'justify',
+    fontSizeNameDelta: 9,
+    sectionGap: 16,
+    itemGap: 10,
+  },
+};
+
 export const SECTION_TYPE_DEFAULTS = {
   experience: (id) => ({
     id, type: 'experience', title: 'Experience',
