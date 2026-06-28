@@ -5,12 +5,13 @@ import {
   defaultResumeDataMinimal,
   defaultResumeDataDark,
   defaultResumeDataSidebar,
+  defaultResumeDataExecutive,
   SECTION_TYPE_DEFAULTS,
   ATS_DEFAULTS,
 } from '@/utils/defaultData';
 
 const STORAGE_KEY = 'cpwtcv_v1';
-const DATA_VERSION = 4;
+const DATA_VERSION = 5;
 
 const TEMPLATE_DEFAULTS = [
   defaultResumeData,
@@ -18,6 +19,7 @@ const TEMPLATE_DEFAULTS = [
   defaultResumeDataMinimal,
   defaultResumeDataDark,
   defaultResumeDataSidebar,
+  defaultResumeDataExecutive,
 ];
 
 function seedResumes() {
@@ -172,8 +174,21 @@ export function useAppStore() {
     patchActive(r => ({ ...r, settings: { ...ATS_DEFAULTS } }));
   }
 
+  const TEMPLATE_STYLE_DEFAULTS = {
+    executive: { headingStyle: 'underline', sectionTitleCase: 'normal' },
+    classic:   { headingStyle: 'ruled',     sectionTitleCase: 'upper'  },
+    modern:    { headingStyle: 'line',      sectionTitleCase: 'upper'  },
+    minimal:   { headingStyle: 'underline', sectionTitleCase: 'upper'  },
+    sidebar:   { headingStyle: 'plain',     sectionTitleCase: 'upper'  },
+  };
+
   function setTemplate(template) {
-    patchActive(r => ({ ...r, template }));
+    const styleDefaults = TEMPLATE_STYLE_DEFAULTS[template] || {};
+    patchActive(r => ({
+      ...r,
+      template,
+      settings: { ...r.settings, ...styleDefaults },
+    }));
   }
 
   // ── Sections ───────────────────────────────────────────────────────

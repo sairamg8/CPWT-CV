@@ -1,6 +1,5 @@
 import { useContext } from 'react';
-import { Mail, Phone, MapPin, Globe } from 'lucide-react';
-import { LinkedinIcon, GithubIcon } from '@/utils/brandIcons';
+import { Mail, Phone, MapPin, Globe, Link2, Code } from 'lucide-react';
 import { getFontById } from '@/utils/fonts';
 import { HeadingStyleContext } from '@/templates/headingStyle';
 import { SectionCaseContext } from '@/templates/sectionCase';
@@ -43,8 +42,8 @@ function ContactRow({ personal, hidden, contactStyle, contactLayout, iconSize = 
     { key: 'phone',    Icon: Phone,  val: personal.phone,    display: personal.phone },
     { key: 'location', Icon: MapPin, val: personal.location, display: personal.location },
     { key: 'website',  Icon: Globe,  val: personal.website,  display: personal.websiteLabel || personal.website },
-    { key: 'linkedin', Icon: LinkedinIcon, val: personal.linkedin, display: personal.linkedinLabel || personal.linkedin },
-    { key: 'github',   Icon: GithubIcon,  val: personal.github,   display: personal.githubLabel || personal.github },
+    { key: 'linkedin', Icon: Link2,  val: personal.linkedin, display: personal.linkedinLabel || personal.linkedin },
+    { key: 'github',   Icon: Code,   val: personal.github,   display: personal.githubLabel || personal.github },
   ].filter(({ key, val }) => !hidden.has(key) && val);
 
   if (!items.length) return null;
@@ -59,7 +58,7 @@ function ContactRow({ personal, hidden, contactStyle, contactLayout, iconSize = 
       : display;
     if (contactStyle === 'icon') return (
       <span key={key} className="flex items-center gap-1.5" style={{ overflowWrap: 'anywhere' }}>
-        <Icon size={iconSize} strokeWidth={2} className="shrink-0" />{label}
+        <Icon size={iconSize} className="shrink-0" />{label}
       </span>
     );
     if (contactStyle === 'bullet') return (
@@ -146,7 +145,7 @@ function ItemHeader({ title, subtitle, extra, date, titleStyle, centered, textCo
           </div>
         )}
       </div>
-      {date && <div className="text-gray-400 whitespace-nowrap shrink-0">{date}</div>}
+      {date && <div className="whitespace-nowrap shrink-0" style={{ color: '#4b5563' }}>{date}</div>}
     </div>
   );
 }
@@ -171,20 +170,21 @@ function SectionTitle({ title, centered, accent, borderColor }) {
   const sectionCase = useContext(SectionCaseContext);
   const caseClass = sectionCase === 'normal' ? '' : 'uppercase';
   const tracking = sectionCase === 'normal' ? 'tracking-normal' : 'tracking-[0.08em]';
-  const base = `font-semibold ${caseClass} ${tracking} text-gray-400`;
+  const base = `font-semibold ${caseClass} ${tracking}`;
+  const darkColor = '#374151';
   const bc = borderColor || accent || '#64748b';
 
-  const sizeStyle = { fontSize: 'var(--fs-section, 10pt)' };
+  const sizeStyle = { fontSize: 'var(--fs-section, 10pt)', color: darkColor };
 
   const gap = { marginTop: 'var(--section-gap)', marginBottom: '6px' };
 
   if (style === 'plain') {
-    return <h2 className={`${base} first:mt-0 ${centered ? 'text-center' : ''}`} style={{ ...sizeStyle, ...gap }}>{title}</h2>;
+    return <h2 className={`${base} first:mt-0 ${centered ? 'text-center' : ''}`} style={{ ...sizeStyle, ...gap, color: accent }}>{title}</h2>;
   }
   if (style === 'box') {
     return (
       <div className={`first:mt-0 px-2 py-1 rounded ${centered ? 'text-center' : ''}`} style={{ ...gap, backgroundColor: bc + '12' }}>
-        <h2 className={base} style={sizeStyle}>{title}</h2>
+        <h2 className={base} style={{ ...sizeStyle, color: accent }}>{title}</h2>
       </div>
     );
   }
@@ -208,7 +208,7 @@ function SectionTitle({ title, centered, accent, borderColor }) {
     return (
       <div className="flex items-center gap-2 first:mt-0" style={gap}>
         {centered && <div className="flex-1" style={{ height: 'var(--section-border-width,1px)', backgroundColor: borderColor || '#d1d5db' }} />}
-        <h2 className={`${base} whitespace-nowrap`} style={sizeStyle}>{title}</h2>
+        <h2 className={`${base} whitespace-nowrap`} style={{ ...sizeStyle, color: accent }}>{title}</h2>
         <div className="flex-1" style={{ height: 'var(--section-border-width,1px)', backgroundColor: borderColor || '#d1d5db' }} />
       </div>
     );
@@ -485,7 +485,7 @@ function LanguagesSection({ section, accent, borderColor }) {
         {visibleItems.map(item => (
           <div key={item.id} className={`flex ${centered ? 'justify-center gap-2' : 'justify-between'}`}>
             <span className="font-medium text-gray-900">{item.language}</span>
-            <span className="text-gray-400">{item.proficiency}</span>
+            <span style={{ color: '#4b5563' }}>{item.proficiency}</span>
           </div>
         ))}
       </div>
@@ -509,7 +509,7 @@ function CertificationsSection({ section, accent, borderColor }) {
               <span className="font-semibold text-gray-900">{item.name}</span>
               {item.issuer && <span className="text-gray-500"> — {item.issuer}</span>}
             </div>
-            {showDates && item.date && <span className="text-gray-400 whitespace-nowrap">{item.date}</span>}
+            {showDates && item.date && <span className="whitespace-nowrap" style={{ color: '#4b5563' }}>{item.date}</span>}
           </div>
         ))}
       </div>
@@ -534,7 +534,7 @@ function AwardsSection({ section, accent, borderColor }) {
                 <span className="font-semibold text-gray-900">{item.title}</span>
                 {item.issuer && <span className="text-gray-500"> — {item.issuer}</span>}
               </div>
-              {showDates && item.date && <span className="text-gray-400 whitespace-nowrap">{item.date}</span>}
+              {showDates && item.date && <span className="whitespace-nowrap" style={{ color: '#4b5563' }}>{item.date}</span>}
             </div>
             {item.description && <p className="text-gray-600 mt-0.5 rich-text-output" dangerouslySetInnerHTML={{ __html: item.description }} />}
           </div>

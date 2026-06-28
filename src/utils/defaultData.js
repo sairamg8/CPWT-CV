@@ -331,6 +331,31 @@ export const defaultResumeDataSidebar = {
   coverLetter: BASE_COVER_LETTER,
 };
 
+
+// ── Executive Template — ATS-friendly, accent headings, vibrant ───────────────
+
+export const defaultResumeDataExecutive = {
+  id: 'resume_executive',
+  name: 'Executive',
+  updatedAt: Date.now(),
+  template: 'executive',
+  settings: {
+    ...ATS_DEFAULTS,
+    accentColor: '#2563eb',
+    textColor: '#111111',
+    headingStyle: 'underline',
+    sectionTitleCase: 'normal',
+    contactStyle: 'icon',
+    contactLayout: 'justify',
+    fontSizeNameDelta: 9,
+    sectionGap: 16,
+    itemGap: 10,
+  },
+  personal: SAIRAM_PERSONAL,
+  sections: SAIRAM_SECTIONS,
+  coverLetter: BASE_COVER_LETTER,
+};
+
 // ── Section type factories ────────────────────────────────────────────────────
 
 export const SECTION_TYPE_DEFAULTS = {
