@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { defaultResumeData, dummyResumeData, SECTION_TYPE_DEFAULTS, ATS_DEFAULTS } from '@/utils/defaultData';
+import { defaultResumeData, dummyResumeData, defaultResumeDataExecutive, SECTION_TYPE_DEFAULTS, ATS_DEFAULTS } from '@/utils/defaultData';
 
 const STORAGE_KEY = 'cpwtcv_v1';
 
@@ -11,9 +11,11 @@ function loadStore() {
       if (parsed.resumes && parsed.activeId) return parsed;
     }
   } catch {}
-  const sairam = { ...JSON.parse(JSON.stringify(defaultResumeData)), id: `resume_${Date.now()}`, updatedAt: Date.now() };
-  const maya = { ...JSON.parse(JSON.stringify(dummyResumeData)), id: `resume_${Date.now() + 1}`, updatedAt: Date.now() };
-  return { resumes: [sairam, maya], activeId: sairam.id };
+  const now = Date.now();
+  const sairam = { ...JSON.parse(JSON.stringify(defaultResumeData)), id: `resume_${now}`, updatedAt: now };
+  const exec   = { ...JSON.parse(JSON.stringify(defaultResumeDataExecutive)), id: `resume_${now + 1}`, updatedAt: now };
+  const maya   = { ...JSON.parse(JSON.stringify(dummyResumeData)), id: `resume_${now + 2}`, updatedAt: now };
+  return { resumes: [sairam, exec, maya], activeId: sairam.id };
 }
 
 export function useAppStore() {
@@ -142,8 +144,21 @@ export function useAppStore() {
     patchActive(r => ({ ...r, settings: { ...ATS_DEFAULTS } }));
   }
 
+  const TEMPLATE_STYLE_DEFAULTS = {
+    executive: { headingStyle: 'underline', sectionTitleCase: 'normal' },
+    classic:   { headingStyle: 'ruled',     sectionTitleCase: 'upper'  },
+    modern:    { headingStyle: 'line',      sectionTitleCase: 'upper'  },
+    minimal:   { headingStyle: 'underline', sectionTitleCase: 'upper'  },
+    sidebar:   { headingStyle: 'plain',     sectionTitleCase: 'upper'  },
+  };
+
   function setTemplate(template) {
-    patchActive(r => ({ ...r, template }));
+    const styleDefaults = TEMPLATE_STYLE_DEFAULTS[template] || {};
+    patchActive(r => ({
+      ...r,
+      template,
+      settings: { ...r.settings, ...styleDefaults },
+    }));
   }
 
   // ── Sections ───────────────────────────────────────────────────────
