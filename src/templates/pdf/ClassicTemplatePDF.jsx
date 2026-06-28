@@ -61,7 +61,7 @@ function ExperienceItem({ item, settings }) {
 }
 
 function SectionRouter({ section, settings }) {
-  if (!section.visible) return null;
+  if (section.visible === false) return null;
   const titleProps = {
     title: section.title,
     headingStyle: settings?.headingStyle,
