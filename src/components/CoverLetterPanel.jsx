@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Mail, Phone, MapPin, Globe, Link2, Code, Eye, EyeOff, ChevronDown, ChevronUp, Camera } from 'lucide-react';
-import RichTextEditor from './RichTextEditor';
+import RichTextEditor from '@/components/RichTextEditor';
 
 const CONTACT_FIELDS = [
   { key: 'email',    label: 'Email',    Icon: Mail   },

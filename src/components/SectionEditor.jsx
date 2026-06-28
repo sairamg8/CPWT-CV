@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Trash2, Plus, ChevronDown, ChevronUp, GripVertical, Settings2,
-  AlignLeft, AlignCenter, Eye, EyeOff, X, RotateCcw,
+  AlignLeft, AlignCenter, Eye, EyeOff, X, RotateCcw, MoreHorizontal,
 } from 'lucide-react';
-import { SECTION_TYPE_DEFAULTS } from '../utils/defaultData';
-import RichTextEditor from './RichTextEditor';
+import { SECTION_TYPE_DEFAULTS } from '@/utils/defaultData';
+import RichTextEditor from '@/components/RichTextEditor';
 import {
   DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors,
 } from '@dnd-kit/core';
@@ -637,6 +637,17 @@ export function SortableSection({
 }) {
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [sectionOpen, setSectionOpen] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [menuOpen]);
 
   useEffect(() => {
     if (forceOpenKey > 0) setSectionOpen(forceOpen);
@@ -713,30 +724,43 @@ export function SortableSection({
         >
           {isHidden ? <EyeOff size={13} /> : <Eye size={13} />}
         </button>
-        <button
-          onClick={() => setCustomizerOpen(o => !o)}
-          className={`p-1.5 rounded transition-colors shrink-0 ${customizerOpen ? 'text-blue-600 bg-blue-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
-          title="Customize"
-        >
-          <Settings2 size={13} />
-        </button>
-        <button
-          onClick={() => {
-            const factory = SECTION_TYPE_DEFAULTS[section.type] || SECTION_TYPE_DEFAULTS.custom;
-            const fresh = factory(section.id);
-            updateSection(section.id, s => ({ ...s, settings: { ...fresh.settings } }));
-          }}
-          className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors shrink-0"
-          title="Reset section style to defaults"
-        >
-          <RotateCcw size={13} />
-        </button>
-        <button
-          onClick={() => removeSection(section.id)}
-          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors shrink-0"
-        >
-          <Trash2 size={13} />
-        </button>
+        <div ref={menuRef} className="relative shrink-0">
+          <button
+            onClick={() => setMenuOpen(o => !o)}
+            className={`p-1.5 rounded transition-colors ${menuOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+            title="Section options"
+          >
+            <MoreHorizontal size={14} />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1">
+              <button
+                onClick={() => { setCustomizerOpen(o => !o); setMenuOpen(false); }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
+              >
+                <Settings2 size={13} /> {customizerOpen ? 'Hide options' : 'Customize layout'}
+              </button>
+              <button
+                onClick={() => {
+                  const factory = SECTION_TYPE_DEFAULTS[section.type] || SECTION_TYPE_DEFAULTS.custom;
+                  const fresh = factory(section.id);
+                  updateSection(section.id, s => ({ ...s, settings: { ...fresh.settings } }));
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
+              >
+                <RotateCcw size={13} /> Reset style
+              </button>
+              <div className="my-1 border-t border-gray-100" />
+              <button
+                onClick={() => { removeSection(section.id); setMenuOpen(false); }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+              >
+                <Trash2 size={13} /> Delete section
+              </button>
+            </div>
+          )}
+        </div>
         <button
           onClick={() => setSectionOpen(o => !o)}
           className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors shrink-0"

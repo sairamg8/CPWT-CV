@@ -1,8 +1,10 @@
 import { useContext } from 'react';
 import { Mail, Phone, MapPin, Globe, Link2, Code } from 'lucide-react';
-import { getFontById } from '../utils/fonts';
-import { HeadingStyleContext } from './headingStyle';
-import { SectionCaseContext } from './sectionCase';
+import { getFontById } from '@/utils/fonts';
+import { HeadingStyleContext } from '@/templates/headingStyle';
+import { SectionCaseContext } from '@/templates/sectionCase';
+
+const ROW_GAP = { compact: '4px', normal: '8px', relaxed: '14px' };
 
 
 function photoStyle(settings, accent) {
@@ -23,16 +25,17 @@ function photoStyle(settings, accent) {
   };
 }
 
-function ItemDesc({ description, bullets, accent }) {
+function ItemDesc({ description, bullets, accent, textColor }) {
+  const bodyColor = textColor || '#374151';
   return (
     <>
       {description && (
-        <div className="leading-relaxed mt-1 rich-text-output" style={{ color: '#374151' }} dangerouslySetInnerHTML={{ __html: description }} />
+        <div className="leading-relaxed mt-1 rich-text-output" style={{ color: bodyColor }} dangerouslySetInnerHTML={{ __html: description }} />
       )}
       {bullets?.length > 0 && (
         <ul className="mt-1 space-y-0.5">
           {bullets.map((b, i) => b && (
-            <li key={i} className="flex gap-1.5" style={{ color: '#4b5563' }}>
+            <li key={i} className="flex gap-1.5" style={{ color: bodyColor }}>
               <span className="shrink-0 mt-0.5" style={{ color: accent }}>•</span>
               {b}
             </li>
@@ -49,7 +52,7 @@ function MainTitle({ title, accent, borderColor }) {
   const caseClass = sectionCase === 'normal' ? '' : 'uppercase';
   const tracking = sectionCase === 'normal' ? 'tracking-normal' : 'tracking-[0.06em]';
   const bc = borderColor || accent || '#374151';
-  const h2 = <h2 className={`text-xs font-bold ${caseClass} ${tracking}`} style={{ color: '#374151' }}>{title}</h2>;
+  const h2 = <h2 className={`font-bold ${caseClass} ${tracking}`} style={{ color: accent, fontSize: 'var(--fs-section, 10pt)' }}>{title}</h2>;
 
   if (style === 'plain') return <div className="mb-2">{h2}</div>;
   if (style === 'underline') return <div className="mb-2 pb-1" style={{ borderBottom: `var(--section-border-width,1px) solid ${bc}` }}>{h2}</div>;
@@ -91,9 +94,19 @@ function SideTitle({ title }) {
 export default function SidebarTemplate({ data }) {
   const { personal, sections } = data;
   const fontFamily = data.settings?.customFont || getFontById(data.settings?.font)?.family || "'Inter', sans-serif";
-  const accent = data.settings?.accentColor || '#2563eb';
-  const borderColor = data.settings?.sectionBorderColor || '';
+  const accent        = data.settings?.accentColor      || '#2563eb';
+  const textColor     = data.settings?.textColor        || '#1e293b';
+  const sidebarBg     = data.settings?.sidebarBg        || '#1e293b';
+  const headerText    = data.settings?.headerTextColor  || '#ffffff';
+  const nameColor     = data.settings?.nameColor        || headerText;
+  const jobTitleColor = data.settings?.jobTitleColor    || accent;
+  const borderColor   = data.settings?.sectionBorderColor || '';
   const hidden = new Set(personal?.hiddenFields || []);
+
+  const baseSize    = data.settings?.fontSizeBase || 11;
+  const nameSize    = baseSize + (data.settings?.fontSizeNameDelta ?? 8);
+  const sectionSize = baseSize + (data.settings?.fontSizeSectionDelta ?? 1);
+  const entrySize   = baseSize + (data.settings?.fontSizeEntryDelta ?? 0);
 
   const SIDEBAR_TYPES = new Set(['skills', 'education', 'languages', 'certifications', 'interests', 'references']);
   const visibleSections = sections.filter(s => s.visible !== false);
@@ -114,31 +127,27 @@ export default function SidebarTemplate({ data }) {
 
   function renderMain(section) {
     switch (section.type) {
-      case 'experience':   return <MainExperience   key={section.id} section={section} accent={accent} borderColor={borderColor} />;
-      case 'projects':     return <MainProjects     key={section.id} section={section} accent={accent} borderColor={borderColor} />;
-      case 'awards':       return <MainAwards       key={section.id} section={section} accent={accent} borderColor={borderColor} />;
-      case 'volunteering': return <MainVolunteering key={section.id} section={section} accent={accent} borderColor={borderColor} />;
-      default:             return <MainCustom       key={section.id} section={section} accent={accent} borderColor={borderColor} />;
+      case 'experience':   return <MainExperience   key={section.id} section={section} accent={accent} borderColor={borderColor} textColor={textColor} />;
+      case 'projects':     return <MainProjects     key={section.id} section={section} accent={accent} borderColor={borderColor} textColor={textColor} />;
+      case 'awards':       return <MainAwards       key={section.id} section={section} accent={accent} borderColor={borderColor} textColor={textColor} />;
+      case 'volunteering': return <MainVolunteering key={section.id} section={section} accent={accent} borderColor={borderColor} textColor={textColor} />;
+      default:             return <MainCustom       key={section.id} section={section} accent={accent} borderColor={borderColor} textColor={textColor} />;
     }
   }
 
   return (
     <SectionCaseContext.Provider value={data.settings?.sectionTitleCase || 'upper'}>
     <HeadingStyleContext.Provider value={data.settings?.headingStyle || 'line'}>
-    <div className="flex" style={{ fontFamily, minHeight: '100%', '--section-gap': (data.settings?.sectionGap ?? 16) + 'px', '--item-gap': (data.settings?.itemGap ?? 12) + 'px', '--section-border-width': (data.settings?.sectionBorderWidth ?? 1) + 'px' }}>
+    <div className="flex" style={{ fontFamily, color: textColor, fontSize: baseSize + 'pt', lineHeight: data.settings?.lineHeightValue ?? 1.5, minHeight: '100%', '--fs-base': baseSize + 'pt', '--fs-name': nameSize + 'pt', '--fs-section': sectionSize + 'pt', '--fs-entry': entrySize + 'pt', '--section-gap': (data.settings?.sectionGap ?? 16) + 'px', '--item-gap': (data.settings?.itemGap ?? 12) + 'px', '--section-border-width': (data.settings?.sectionBorderWidth ?? 1) + 'px' }}>
       {/* Sidebar */}
-      <div className="w-[38%] shrink-0 px-4 py-5" style={{ backgroundColor: '#1e293b', color: '#e2e8f0' }}>
+      <div className="w-[38%] shrink-0 px-4 py-5" style={{ backgroundColor: sidebarBg, color: '#e2e8f0' }}>
         {/* Avatar + Name */}
         <div className="mb-5 text-center">
-          {personal.photo && !hidden.has('photo') ? (
+          {personal.photo && !hidden.has('photo') && (
             <img src={personal.photo} alt="" style={photoStyle(data.settings, accent)} />
-          ) : !personal.photo ? (
-            <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center text-2xl font-bold" style={{ backgroundColor: '#334155', color: accent }}>
-              {(personal.name || 'J').charAt(0)}
-            </div>
-          ) : null}
-          <h1 className="text-sm font-bold text-white leading-tight">{personal.name || 'Your Name'}</h1>
-          {personal.title && <p className="text-[10px] mt-0.5" style={{ color: accent }}>{personal.title}</p>}
+          )}
+          <h1 className="font-bold leading-tight" style={{ color: nameColor, fontSize: 'var(--fs-name, 19pt)' }}>{personal.name || 'Your Name'}</h1>
+          {personal.title && <p className="mt-0.5" style={{ color: jobTitleColor, fontSize: 'var(--fs-entry, 10pt)' }}>{personal.title}</p>}
         </div>
 
         {/* Contact */}
@@ -160,18 +169,19 @@ export default function SidebarTemplate({ data }) {
           if (ss.spaceBefore != null) ov.marginTop = ss.spaceBefore + 'px';
           if (ss.spaceAfter  != null) ov['--section-gap'] = ss.spaceAfter + 'px';
           if (ss.itemGap     != null) ov['--item-gap']    = ss.itemGap    + 'px';
+          else if (ss.spacing)        ov['--item-gap']    = ROW_GAP[ss.spacing] || ROW_GAP.normal;
           return <div key={section.id} style={ov}>{renderSide(section)}</div>;
         })}
       </div>
 
       {/* Main */}
-      <div className="flex-1 px-5 py-5" style={{ color: '#1e293b' }}>
+      <div className="flex-1 px-5 py-5" style={{ color: textColor }}>
         {!hidden.has('summary') && personal.summary && personal.summary.replace(/<[^>]*>/g, '').trim() && (
           <div style={{ marginBottom: 'var(--section-gap)' }}>
             <MainTitle title="About Me" accent={accent} borderColor={borderColor} />
             <div
               className="leading-relaxed rich-text-output"
-              style={{ color: '#374151' }}
+              style={{ color: textColor }}
               dangerouslySetInnerHTML={{ __html: personal.summary }}
             />
           </div>
@@ -182,6 +192,7 @@ export default function SidebarTemplate({ data }) {
           if (ss.spaceBefore != null) ov.marginTop = ss.spaceBefore + 'px';
           if (ss.spaceAfter  != null) ov['--section-gap'] = ss.spaceAfter + 'px';
           if (ss.itemGap     != null) ov['--item-gap']    = ss.itemGap    + 'px';
+          else if (ss.spacing)        ov['--item-gap']    = ROW_GAP[ss.spacing] || ROW_GAP.normal;
           return <div key={section.id} style={ov}>{renderMain(section)}</div>;
         })}
       </div>
@@ -219,7 +230,6 @@ function SideContact({ icon: Icon, label, text, display, ckey, iconSize = 8, acc
 
 function SideSkills({ section, accent }) {
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   const style = section.settings?.skillsStyle || 'tags';
   return (
     <div style={{ marginBottom: 'var(--section-gap)' }}>
@@ -283,7 +293,6 @@ function SideSkills({ section, accent }) {
 function SideEducation({ section, accent }) {
   const showDates = section.settings?.showDates !== false;
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div style={{ marginBottom: 'var(--section-gap)' }}>
       <SideTitle title={section.title} />
@@ -307,7 +316,6 @@ function SideEducation({ section, accent }) {
 
 function SideLanguages({ section }) {
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div style={{ marginBottom: 'var(--section-gap)' }}>
       <SideTitle title={section.title} />
@@ -326,7 +334,6 @@ function SideLanguages({ section }) {
 function SideCertifications({ section }) {
   const showDates = section.settings?.showDates !== false;
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div style={{ marginBottom: 'var(--section-gap)' }}>
       <SideTitle title={section.title} />
@@ -345,7 +352,6 @@ function SideCertifications({ section }) {
 
 function SideInterests({ section }) {
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div style={{ marginBottom: 'var(--section-gap)' }}>
       <SideTitle title={section.title} />
@@ -364,7 +370,6 @@ function SideInterests({ section }) {
 
 function SideReferences({ section }) {
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div style={{ marginBottom: 'var(--section-gap)' }}>
       <SideTitle title={section.title} />
@@ -381,14 +386,13 @@ function SideReferences({ section }) {
   );
 }
 
-function MainExperience({ section, accent, borderColor }) {
+function MainExperience({ section, accent, borderColor, textColor }) {
   const s = section.settings || {};
   const twoCol = s.columns > 1;
   const showDates = s.showDates !== false;
   const showLoc = s.showLocation !== false;
   const titleOrder = s.titleOrder || 'role';
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div style={{ marginBottom: 'var(--section-gap)' }}>
       <MainTitle title={section.title} accent={accent} borderColor={borderColor} />
@@ -409,16 +413,16 @@ function MainExperience({ section, accent, borderColor }) {
               <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full" style={{ backgroundColor: '#9ca3af' }} />
               <div className="flex justify-between items-start">
                 <div>
-                  {primaryTitle && <div className="font-semibold text-xs" style={{ color: '#111827' }}>{primaryTitle}</div>}
+                  {primaryTitle && <div className="font-semibold" style={{ color: textColor, fontSize: 'var(--fs-entry, 11pt)' }}>{primaryTitle}</div>}
                   {secondaryTitle && (
-                    <div className="text-[10px]" style={{ color: '#6b7280' }}>
+                    <div style={{ color: accent, opacity: 0.8, fontSize: '10px' }}>
                       {secondaryTitle}{loc ? ` · ${loc}` : ''}
                     </div>
                   )}
                 </div>
                 {dateStr && <span className="whitespace-nowrap ml-2 shrink-0" style={{ color: '#9ca3af', fontSize: '10px' }}>{dateStr}</span>}
               </div>
-              {desc && <ItemDesc description={desc} bullets={item.bullets} accent={accent} />}
+              {desc && <ItemDesc description={desc} bullets={item.bullets} accent={accent} textColor={textColor} />}
             </div>
           );
         })}
@@ -427,12 +431,11 @@ function MainExperience({ section, accent, borderColor }) {
   );
 }
 
-function MainProjects({ section, accent, borderColor }) {
+function MainProjects({ section, accent, borderColor, textColor }) {
   const s = section.settings || {};
   const twoCol = s.columns > 1;
   const showDates = s.showDates !== false;
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div style={{ marginBottom: 'var(--section-gap)' }}>
       <MainTitle title={section.title} accent={accent} borderColor={borderColor} />
@@ -442,8 +445,8 @@ function MainProjects({ section, accent, borderColor }) {
             <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full" style={{ backgroundColor: '#9ca3af' }} />
             <div className="flex justify-between items-start">
               <div>
-                <span className="font-semibold text-xs" style={{ color: '#111827' }}>{item.name}</span>
-                {item.technologies && <span className="text-[10px]" style={{ color: '#6b7280' }}> · {item.technologies}</span>}
+                <span className="font-semibold" style={{ color: textColor, fontSize: 'var(--fs-entry, 11pt)' }}>{item.name}</span>
+                {item.technologies && <span style={{ color: accent, opacity: 0.7, fontSize: '10px' }}> · {item.technologies}</span>}
               </div>
               {showDates && (item.startDate || item.endDate) && (
                 <span className="whitespace-nowrap ml-2 shrink-0" style={{ color: '#9ca3af', fontSize: '10px' }}>
@@ -451,8 +454,8 @@ function MainProjects({ section, accent, borderColor }) {
                 </span>
               )}
             </div>
-            {item.url && <div className="text-[10px]" style={{ color: accent }}>{item.url}</div>}
-            <ItemDesc description={item.description} bullets={item.bullets} accent={accent} />
+            {item.url && <div style={{ color: accent, fontSize: '10px' }}>{item.url}</div>}
+            <ItemDesc description={item.description} bullets={item.bullets} accent={accent} textColor={textColor} />
           </div>
         ))}
       </div>
@@ -460,10 +463,9 @@ function MainProjects({ section, accent, borderColor }) {
   );
 }
 
-function MainAwards({ section, accent, borderColor }) {
+function MainAwards({ section, accent, borderColor, textColor }) {
   const showDates = section.settings?.showDates !== false;
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div style={{ marginBottom: 'var(--section-gap)' }}>
       <MainTitle title={section.title} accent={accent} borderColor={borderColor} />
@@ -472,12 +474,12 @@ function MainAwards({ section, accent, borderColor }) {
           <div key={item.id}>
             <div className="flex justify-between items-start">
               <div>
-                <span className="font-semibold text-xs" style={{ color: '#111827' }}>{item.title}</span>
-                {item.issuer && <span className="text-[10px]" style={{ color: '#6b7280' }}> — {item.issuer}</span>}
+                <span className="font-semibold" style={{ color: textColor, fontSize: 'var(--fs-entry, 11pt)' }}>{item.title}</span>
+                {item.issuer && <span style={{ color: accent, opacity: 0.7, fontSize: '10px' }}> — {item.issuer}</span>}
               </div>
               {showDates && item.date && <span className="whitespace-nowrap ml-2 shrink-0" style={{ color: '#9ca3af', fontSize: '10px' }}>{item.date}</span>}
             </div>
-            {item.description && <p className="mt-0.5" style={{ color: '#374151', fontSize: '10.5px' }}>{item.description}</p>}
+            {item.description && <p className="mt-0.5" style={{ opacity: 0.75, fontSize: '10.5px' }}>{item.description}</p>}
           </div>
         ))}
       </div>
@@ -485,11 +487,11 @@ function MainAwards({ section, accent, borderColor }) {
   );
 }
 
-function MainVolunteering({ section, accent, borderColor }) {
+function MainVolunteering({ section, accent, borderColor, textColor }) {
   const s = section.settings || {};
   const showDates = s.showDates !== false;
+  const showLoc = s.showLocation !== false;
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div style={{ marginBottom: 'var(--section-gap)' }}>
       <MainTitle title={section.title} accent={accent} borderColor={borderColor} />
@@ -498,8 +500,9 @@ function MainVolunteering({ section, accent, borderColor }) {
           <div key={item.id}>
             <div className="flex justify-between items-start">
               <div>
-                <span className="font-semibold text-xs" style={{ color: '#111827' }}>{item.role}</span>
-                {item.org && <span style={{ color: '#6b7280' }}> — {item.org}</span>}
+                <span className="font-semibold" style={{ color: textColor, fontSize: 'var(--fs-entry, 11pt)' }}>{item.role}</span>
+                {item.org && <span style={{ color: accent, opacity: 0.85 }}> — {item.org}</span>}
+                {showLoc && item.location && <span style={{ opacity: 0.5 }}>, {item.location}</span>}
               </div>
               {showDates && (item.startDate || item.endDate) && (
                 <span className="whitespace-nowrap ml-2 shrink-0" style={{ color: '#9ca3af', fontSize: '10px' }}>
@@ -507,7 +510,7 @@ function MainVolunteering({ section, accent, borderColor }) {
                 </span>
               )}
             </div>
-            <ItemDesc description={item.description} bullets={item.bullets} accent={accent} />
+            <ItemDesc description={item.description} bullets={item.bullets} accent={accent} textColor={textColor} />
           </div>
         ))}
       </div>
@@ -515,11 +518,10 @@ function MainVolunteering({ section, accent, borderColor }) {
   );
 }
 
-function MainCustom({ section, accent, borderColor }) {
+function MainCustom({ section, accent, borderColor, textColor }) {
   const s = section.settings || {};
   const twoCol = s.columns > 1;
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div style={{ marginBottom: 'var(--section-gap)' }}>
       <MainTitle title={section.title} accent={accent} borderColor={borderColor} />
@@ -528,15 +530,15 @@ function MainCustom({ section, accent, borderColor }) {
           <div key={item.id}>
             <div className="flex justify-between items-start">
               <div>
-                {item.title && <span className="font-semibold text-xs" style={{ color: '#111827' }}>{item.title}</span>}
-                {item.subtitle && <span style={{ color: '#6b7280' }}> — {item.subtitle}</span>}
+                {item.title && <span className="font-semibold" style={{ color: textColor, fontSize: 'var(--fs-entry, 11pt)' }}>{item.title}</span>}
+                {item.subtitle && <span style={{ color: accent, opacity: 0.85 }}> — {item.subtitle}</span>}
               </div>
               <div className="text-right whitespace-nowrap ml-2 shrink-0" style={{ color: '#9ca3af', fontSize: '10px' }}>
                 {item.location && <div>{item.location}</div>}
                 {item.date && <div>{item.date}</div>}
               </div>
             </div>
-            <ItemDesc description={item.description} bullets={item.bullets} accent={accent} />
+            <ItemDesc description={item.description} bullets={item.bullets} accent={accent} textColor={textColor} />
           </div>
         ))}
       </div>

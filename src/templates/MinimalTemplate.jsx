@@ -1,8 +1,8 @@
 import { useContext } from 'react';
 import { Mail, Phone, MapPin, Globe, Link2, Code } from 'lucide-react';
-import { getFontById } from '../utils/fonts';
-import { HeadingStyleContext } from './headingStyle';
-import { SectionCaseContext } from './sectionCase';
+import { getFontById } from '@/utils/fonts';
+import { HeadingStyleContext } from '@/templates/headingStyle';
+import { SectionCaseContext } from '@/templates/sectionCase';
 
 function isHtmlEmpty(html) {
   return !html || !html.replace(/<[^>]*>/g, '').trim();
@@ -123,9 +123,8 @@ function ContactRow({ personal, hidden, contactStyle, contactLayout, iconSize = 
   );
 }
 
-const SP = { compact: 'space-y-1', normal: 'space-y-3', relaxed: 'space-y-5' };
 const COLS = { 1: 'grid-cols-1', 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-cols-4' };
-const ROW_GAP = { compact: 'gap-y-1', normal: 'gap-y-2', relaxed: 'gap-y-3.5' };
+const ROW_GAP = { compact: '4px', normal: '8px', relaxed: '14px' };
 
 // title + subtitle stacked (top/bottom) or inline (side by side), date on the right
 function ItemHeader({ title, subtitle, extra, date, titleStyle, centered, textColor }) {
@@ -228,6 +227,8 @@ export default function MinimalTemplate({ data }) {
   const accent = st.accentColor || '#2563eb';
   const borderColor = st.sectionBorderColor || '';
   const textColor = st.textColor || '#1a1a1a';
+  const nameColor = st.nameColor || textColor;
+  const jobTitleColor = st.jobTitleColor || '#555';
   const headerAlign = st.headerAlign || 'left';
   const headerLayout = st.headerLayout || 'stack';
   const contactStyle = st.contactStyle || 'bar';
@@ -243,21 +244,21 @@ export default function MinimalTemplate({ data }) {
   const contactProps = { personal, hidden, contactStyle, contactLayout, iconSize: st.iconSize ?? 11 };
 
   const NameTitle = () => headerLayout === 'inline' ? (
-    <div className={`flex flex-wrap items-baseline gap-2 ${centered ? 'justify-center' : ''}`}>
-      <h1 className="font-light tracking-tight" style={{ color: textColor, fontSize: 'var(--fs-name, 19pt)' }}>{personal.name || 'Your Name'}</h1>
-      {personal.title && <span style={{ color: '#555', fontSize: 'var(--fs-entry, 11pt)' }}>— {personal.title}</span>}
+    <div className={`flex flex-wrap items-baseline ${centered ? 'justify-center' : ''}`} style={{ gap: `${st.headerInlineGap ?? 8}px` }}>
+      <h1 className="font-light tracking-tight" style={{ color: nameColor, fontSize: 'var(--fs-name, 19pt)' }}>{personal.name || 'Your Name'}</h1>
+      {personal.title && <span style={{ color: jobTitleColor, fontSize: 'var(--fs-entry, 11pt)' }}>{personal.title}</span>}
     </div>
   ) : (
     <>
-      <h1 className="font-light tracking-tight" style={{ color: textColor, fontSize: 'var(--fs-name, 19pt)' }}>{personal.name || 'Your Name'}</h1>
-      {personal.title && <p className="mb-1" style={{ color: '#555', fontSize: 'var(--fs-entry, 11pt)' }}>{personal.title}</p>}
+      <h1 className="font-light tracking-tight" style={{ color: nameColor, fontSize: 'var(--fs-name, 19pt)' }}>{personal.name || 'Your Name'}</h1>
+      {personal.title && <p className="mb-1" style={{ color: jobTitleColor, fontSize: 'var(--fs-entry, 11pt)' }}>{personal.title}</p>}
     </>
   );
 
   return (
     <SectionCaseContext.Provider value={st.sectionTitleCase || 'upper'}>
     <HeadingStyleContext.Provider value={st.headingStyle || 'underline'}>
-      <div style={{ fontFamily, color: textColor, fontSize: baseSize + 'pt', '--fs-base': baseSize + 'pt', '--fs-name': nameSize + 'pt', '--fs-section': sectionSize + 'pt', '--fs-entry': entrySize + 'pt', '--section-gap': (st.sectionGap ?? 16) + 'px', '--item-gap': (st.itemGap ?? 12) + 'px', '--section-border-width': (st.sectionBorderWidth ?? 1) + 'px' }}>
+      <div style={{ fontFamily, color: textColor, fontSize: baseSize + 'pt', lineHeight: st.lineHeightValue ?? 1.5, '--fs-base': baseSize + 'pt', '--fs-name': nameSize + 'pt', '--fs-section': sectionSize + 'pt', '--fs-entry': entrySize + 'pt', '--section-gap': (st.sectionGap ?? 16) + 'px', '--item-gap': (st.itemGap ?? 12) + 'px', '--section-border-width': (st.sectionBorderWidth ?? 1) + 'px' }}>
         <div className="mb-5">
           <div className={`flex ${centered ? 'flex-col items-center text-center' : (st.photoTextAlign === 'center' ? 'items-center' : st.photoTextAlign === 'bottom' ? 'items-end' : 'items-start')} gap-3`}>
             {personal.photo && !hidden.has('photo') && (
@@ -282,7 +283,7 @@ export default function MinimalTemplate({ data }) {
           if (ss.spaceBefore != null) ov.marginTop = ss.spaceBefore + 'px';
           if (ss.spaceAfter  != null) ov['--section-gap'] = ss.spaceAfter + 'px';
           if (ss.itemGap     != null) ov['--item-gap']    = ss.itemGap    + 'px';
-          return <div key={s.id} style={ov}><Section section={s} accent={accent} textColor={textColor} /></div>;
+          return <div key={s.id} style={ov}><Section section={s} accent={accent} textColor={textColor} borderColor={borderColor} /></div>;
         })}
       </div>
     </HeadingStyleContext.Provider>
@@ -290,8 +291,8 @@ export default function MinimalTemplate({ data }) {
   );
 }
 
-function Section({ section, accent, textColor }) {
-  const p = { section, accent, textColor };
+function Section({ section, accent, textColor, borderColor }) {
+  const p = { section, accent, textColor, borderColor };
   switch (section.type) {
     case 'experience':     return <ExperienceSection     {...p} />;
     case 'education':      return <EducationSection      {...p} />;
@@ -307,20 +308,19 @@ function Section({ section, accent, textColor }) {
   }
 }
 
-function ExperienceSection({ section, accent, textColor }) {
+function ExperienceSection({ section, accent, textColor, borderColor }) {
   const s = section.settings || {};
-  const spacing = SP[s.spacing] || SP.normal;
+  const rowGap = s.itemGap != null ? s.itemGap + 'px' : (ROW_GAP[s.spacing] || ROW_GAP.normal);
   const twoCol = s.columns > 1;
   const showDates = s.showDates !== false;
   const showLoc = s.showLocation !== false;
   const centered = s.alignment === 'center';
   const titleOrder = s.titleOrder || 'company';
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div className={centered ? 'text-center' : ''}>
       <SectionTitle title={section.title} centered={centered} accent={accent} borderColor={borderColor} />
-      <div className={twoCol ? 'grid grid-cols-2' : 'flex flex-col'} style={{ gap: 'var(--item-gap)' }}>
+      <div className={twoCol ? 'grid grid-cols-2' : 'flex flex-col'} style={{ gap: rowGap }}>
         {visibleItems.map(item => {
           const iH = new Set(item.hiddenFields || []);
           const company = iH.has('company') ? '' : item.company;
@@ -350,19 +350,18 @@ function ExperienceSection({ section, accent, textColor }) {
   );
 }
 
-function EducationSection({ section, accent, textColor }) {
+function EducationSection({ section, accent, textColor, borderColor }) {
   const s = section.settings || {};
-  const spacing = SP[s.spacing] || 'space-y-2';
+  const rowGap = s.itemGap != null ? s.itemGap + 'px' : (ROW_GAP[s.spacing] || ROW_GAP.normal);
   const twoCol = s.columns > 1;
   const showDates = s.showDates !== false;
   const showLoc = s.showLocation !== false;
   const centered = s.alignment === 'center';
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div className={centered ? 'text-center' : ''}>
       <SectionTitle title={section.title} centered={centered} accent={accent} borderColor={borderColor} />
-      <div className={twoCol ? 'grid grid-cols-2' : 'flex flex-col'} style={{ gap: 'var(--item-gap)' }}>
+      <div className={twoCol ? 'grid grid-cols-2' : 'flex flex-col'} style={{ gap: rowGap }}>
         {visibleItems.map(item => (
           <div key={item.id}>
             <ItemHeader
@@ -389,23 +388,21 @@ function EducationSection({ section, accent, textColor }) {
   );
 }
 
-function SkillsSection({ section, accent, textColor }) {
+function SkillsSection({ section, accent, textColor, borderColor }) {
   const s = section.settings || {};
   const cols = s.columns || 1;
   const style = s.skillsStyle || 'inline';
   const centered = s.alignment === 'center';
   const sep = s.separator === 'dash' ? ' – ' : ': ';
-  const rowGapClass = s.itemGap != null ? '' : (ROW_GAP[s.spacing] || ROW_GAP.normal);
-  const rowGapStyle = s.itemGap != null ? { rowGap: s.itemGap + 'px' } : {};
+  const rowGap = s.itemGap != null ? s.itemGap + 'px' : (ROW_GAP[s.spacing] || ROW_GAP.normal);
   const isBullet = style === 'bullet';
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
 
   return (
     <div className={centered ? 'text-center' : ''}>
       <SectionTitle title={section.title} centered={centered} accent={accent} borderColor={borderColor} />
       {style === 'tags' ? (
-        <div className={`grid ${COLS[cols] || 'grid-cols-1'}`} style={{ rowGap: 'var(--item-gap)' }}>
+        <div className={`grid ${COLS[cols] || 'grid-cols-1'}`} style={{ rowGap }}>
           {visibleItems.map(item => {
             const iH = item.hiddenFields || [];
             const showCat = item.category && !iH.includes('category');
@@ -425,7 +422,7 @@ function SkillsSection({ section, accent, textColor }) {
           })}
         </div>
       ) : (
-        <ul className={`grid gap-x-6 ${rowGapClass} ${COLS[cols] || 'grid-cols-1'} ${isBullet ? 'list-disc pl-4' : 'list-none'}`} style={rowGapStyle}>
+        <ul className={`grid gap-x-6 ${COLS[cols] || 'grid-cols-1'} ${isBullet ? 'list-disc pl-4' : 'list-none'}`} style={{ rowGap }}>
           {visibleItems.map(item => {
             const iH = item.hiddenFields || [];
             const showCat = item.category && !iH.includes('category');
@@ -443,18 +440,17 @@ function SkillsSection({ section, accent, textColor }) {
   );
 }
 
-function ProjectsSection({ section, accent, textColor }) {
+function ProjectsSection({ section, accent, textColor, borderColor }) {
   const s = section.settings || {};
-  const spacing = SP[s.spacing] || 'space-y-2.5';
+  const rowGap = s.itemGap != null ? s.itemGap + 'px' : (ROW_GAP[s.spacing] || ROW_GAP.normal);
   const twoCol = s.columns > 1;
   const showDates = s.showDates !== false;
   const centered = s.alignment === 'center';
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div className={centered ? 'text-center' : ''}>
       <SectionTitle title={section.title} centered={centered} accent={accent} borderColor={borderColor} />
-      <div className={twoCol ? 'grid grid-cols-2' : 'flex flex-col'} style={{ gap: 'var(--item-gap)' }}>
+      <div className={twoCol ? 'grid grid-cols-2' : 'flex flex-col'} style={{ gap: rowGap }}>
         {visibleItems.map(item => (
           <div key={item.id} className={!twoCol && !centered ? 'grid grid-cols-[1fr_auto] gap-x-4' : undefined}>
             <div>
@@ -475,16 +471,16 @@ function ProjectsSection({ section, accent, textColor }) {
   );
 }
 
-function LanguagesSection({ section }) {
+function LanguagesSection({ section, accent, borderColor }) {
   const s = section.settings || {};
   const cols = s.columns || 2;
   const centered = s.alignment === 'center';
+  const rowGap = s.itemGap != null ? s.itemGap + 'px' : (ROW_GAP[s.spacing] || ROW_GAP.normal);
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div className={centered ? 'text-center' : ''}>
       <SectionTitle title={section.title} centered={centered} accent={accent} borderColor={borderColor} />
-      <div className={`grid gap-x-4 gap-y-0.5 ${COLS[cols] || 'grid-cols-2'}`}>
+      <div className={`grid gap-x-4 ${COLS[cols] || 'grid-cols-2'}`} style={{ rowGap }}>
         {visibleItems.map(item => (
           <div key={item.id} className={`flex ${centered ? 'justify-center gap-2' : 'justify-between'}`}>
             <span className="font-medium text-gray-900">{item.language}</span>
@@ -496,15 +492,16 @@ function LanguagesSection({ section }) {
   );
 }
 
-function CertificationsSection({ section }) {
-  const showDates = section.settings?.showDates !== false;
-  const centered = section.settings?.alignment === 'center';
+function CertificationsSection({ section, accent, borderColor }) {
+  const s = section.settings || {};
+  const showDates = s.showDates !== false;
+  const centered = s.alignment === 'center';
+  const rowGap = s.itemGap != null ? s.itemGap + 'px' : (ROW_GAP[s.spacing] || ROW_GAP.normal);
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div className={centered ? 'text-center' : ''}>
       <SectionTitle title={section.title} centered={centered} accent={accent} borderColor={borderColor} />
-      <div className={SP[section.settings?.spacing] || SP.normal}>
+      <div className="flex flex-col" style={{ gap: rowGap }}>
         {visibleItems.map(item => (
           <div key={item.id} className={centered ? '' : 'grid grid-cols-[1fr_auto] gap-x-4'}>
             <div>
@@ -519,15 +516,16 @@ function CertificationsSection({ section }) {
   );
 }
 
-function AwardsSection({ section }) {
-  const showDates = section.settings?.showDates !== false;
-  const centered = section.settings?.alignment === 'center';
+function AwardsSection({ section, accent, borderColor }) {
+  const s = section.settings || {};
+  const showDates = s.showDates !== false;
+  const centered = s.alignment === 'center';
+  const rowGap = s.itemGap != null ? s.itemGap + 'px' : (ROW_GAP[s.spacing] || ROW_GAP.normal);
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div className={centered ? 'text-center' : ''}>
       <SectionTitle title={section.title} centered={centered} accent={accent} borderColor={borderColor} />
-      <div className={SP[section.settings?.spacing] || SP.normal}>
+      <div className="flex flex-col" style={{ gap: rowGap }}>
         {visibleItems.map(item => (
           <div key={item.id}>
             <div className={centered ? '' : 'grid grid-cols-[1fr_auto] gap-x-4'}>
@@ -545,17 +543,16 @@ function AwardsSection({ section }) {
   );
 }
 
-function VolunteeringSection({ section }) {
+function VolunteeringSection({ section, accent, borderColor }) {
   const s = section.settings || {};
-  const spacing = SP[s.spacing] || SP.normal;
+  const rowGap = s.itemGap != null ? s.itemGap + 'px' : (ROW_GAP[s.spacing] || ROW_GAP.normal);
   const showDates = s.showDates !== false;
   const centered = s.alignment === 'center';
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div className={centered ? 'text-center' : ''}>
       <SectionTitle title={section.title} centered={centered} accent={accent} borderColor={borderColor} />
-      <div className="flex flex-col" style={{ gap: 'var(--item-gap)' }}>
+      <div className="flex flex-col" style={{ gap: rowGap }}>
         {visibleItems.map(item => (
           <div key={item.id} className={centered ? '' : 'grid grid-cols-[1fr_auto] gap-x-4'}>
             <div>
@@ -573,16 +570,16 @@ function VolunteeringSection({ section }) {
   );
 }
 
-function ReferencesSection({ section }) {
+function ReferencesSection({ section, accent, borderColor }) {
   const s = section.settings || {};
   const cols = s.columns || 2;
   const centered = s.alignment === 'center';
+  const rowGap = s.itemGap != null ? s.itemGap + 'px' : (ROW_GAP[s.spacing] || ROW_GAP.normal);
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div className={centered ? 'text-center' : ''}>
       <SectionTitle title={section.title} centered={centered} accent={accent} borderColor={borderColor} />
-      <div className={`grid ${COLS[cols] || 'grid-cols-2'}`} style={{ gap: 'var(--item-gap)' }}>
+      <div className={`grid ${COLS[cols] || 'grid-cols-2'}`} style={{ gap: rowGap }}>
         {visibleItems.map(item => (
           <div key={item.id}>
             <p className="font-semibold text-gray-900">{item.name}</p>
@@ -596,10 +593,9 @@ function ReferencesSection({ section }) {
   );
 }
 
-function InterestsSection({ section }) {
+function InterestsSection({ section, accent, borderColor }) {
   const centered = section.settings?.alignment === 'center';
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div className={centered ? 'text-center' : ''}>
       <SectionTitle title={section.title} centered={centered} accent={accent} borderColor={borderColor} />
@@ -610,17 +606,16 @@ function InterestsSection({ section }) {
   );
 }
 
-function CustomSection({ section, accent, textColor }) {
+function CustomSection({ section, accent, textColor, borderColor }) {
   const s = section.settings || {};
-  const spacing = SP[s.spacing] || 'space-y-2';
+  const rowGap = s.itemGap != null ? s.itemGap + 'px' : (ROW_GAP[s.spacing] || ROW_GAP.normal);
   const twoCol = s.columns > 1;
   const centered = s.alignment === 'center';
   const visibleItems = section.items.filter(i => i.visible !== false);
-  if (!visibleItems.length) return null;
   return (
     <div className={centered ? 'text-center' : ''}>
       <SectionTitle title={section.title} centered={centered} accent={accent} borderColor={borderColor} />
-      <div className={twoCol ? 'grid grid-cols-2' : 'flex flex-col'} style={{ gap: 'var(--item-gap)' }}>
+      <div className={twoCol ? 'grid grid-cols-2' : 'flex flex-col'} style={{ gap: rowGap }}>
         {visibleItems.map(item => (
           <div key={item.id}>
             <ItemHeader

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { defaultResumeData, SECTION_TYPE_DEFAULTS, ATS_DEFAULTS } from '../utils/defaultData';
+import { defaultResumeData, SECTION_TYPE_DEFAULTS, ATS_DEFAULTS } from '@/utils/defaultData';
 
 const STORAGE_KEY = 'cpwtcv_v1';
 

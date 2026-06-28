@@ -1,5 +1,5 @@
 import { Mail, Phone, MapPin, Globe, Link2, Code } from 'lucide-react';
-import { getFontById } from '../utils/fonts';
+import { getFontById } from '@/utils/fonts';
 
 function photoStyle(settings, accent) {
   const sh = settings?.photoShape || 'circle';

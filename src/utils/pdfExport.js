@@ -131,6 +131,11 @@ export function exportToPDF(elementId, filename = 'resume.pdf', pageMargin = '14
         #__cpwtcv_print_portal__ { display: block !important; }
         .__cpwtcv_page__ { page-break-after: always; }
         .__cpwtcv_page__:last-child { page-break-after: auto; }
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
       }
     `;
     document.head.appendChild(style);

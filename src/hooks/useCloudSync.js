@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   collection, doc, getDocs, getDoc, setDoc, deleteDoc, writeBatch,
 } from 'firebase/firestore';
-import { db } from '../utils/firebase';
+import { db } from '@/utils/firebase';
 
 function resumesCol(uid) { return collection(db, 'users', uid, 'resumes'); }
 function resumeDoc(uid, id) { return doc(db, 'users', uid, 'resumes', id); }
