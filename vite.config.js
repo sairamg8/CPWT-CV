@@ -10,4 +10,21 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('@react-pdf/renderer') || id.includes('pdfkit') || id.includes('fontkit')) {
+            return 'react-pdf';
+          }
+          if (id.includes('docx') || id.includes('pizzip') || id.includes('jszip')) {
+            return 'docx';
+          }
+          if (id.includes('firebase')) {
+            return 'firebase';
+          }
+        },
+      },
+    },
+  },
 })

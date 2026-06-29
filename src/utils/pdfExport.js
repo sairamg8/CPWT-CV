@@ -166,6 +166,13 @@ export function exportToPDF(elementId, filename = 'resume.pdf', pageMargin = '14
           font-family: Arial, Helvetica, 'Liberation Sans', sans-serif !important;
         }
 
+        /* Prevent vertical overlap of name/title and headings by enforcing line-heights */
+        #__cpwtcv_print_portal__ h1,
+        #__cpwtcv_print_portal__ h2,
+        #__cpwtcv_print_portal__ p {
+          line-height: 1.25 !important;
+        }
+
         /* ATS COMPATIBILITY — strip bold from rich-text content inside descriptions.
            Bold <strong>/<b> project sub-headers look like entry-level markers to ATS
            parsers, causing them to lose the actual company name for that entry.
@@ -186,7 +193,7 @@ export function exportToPDF(elementId, filename = 'resume.pdf', pageMargin = '14
     document.head.appendChild(style);
 
     const originalTitle = document.title;
-    document.title = '';
+    document.title = filename.replace(/\.pdf$/i, '').replace(/_/g, ' ').replace(/-/g, ' ');
 
     function cleanup() {
       document.title = originalTitle;

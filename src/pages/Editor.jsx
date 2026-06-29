@@ -24,9 +24,6 @@ import CoverLetterPanel from '@/components/CoverLetterPanel';
 import { ExportDropdown } from '@/components/ExportDropdown';
 import ClassicTemplate from '@/templates/ClassicTemplate';
 import CoverLetterTemplate from '@/templates/CoverLetterTemplate';
-import { exportToPDF } from '@/utils/pdfExport';
-import { exportToPDFReact } from '@/utils/pdfExportReactPDF';
-import { exportToWord } from '@/utils/wordExport';
 import { getFontById, loadGoogleFont, loadCustomGoogleFont } from '@/utils/fonts';
 
 function buildExportFilename(authUser, resume) {
@@ -148,13 +145,21 @@ export function Editor({ store, auth, sync }) {
   async function handleExportPDF() {
     setExporting('pdf');
     const filename = buildExportFilename(auth?.user, resume);
-    try { await exportToPDFReact(resume, `${filename}.pdf`); } catch (e) { console.error('PDF export failed:', e); }
+    try {
+      const { exportToPDFReact, exportCoverLetterPDFReact } = await import('@/utils/pdfExportReactPDF');
+      if (activeTab === 'coverletter') {
+        await exportCoverLetterPDFReact(resume, `${filename}_cover_letter.pdf`);
+      } else {
+        await exportToPDFReact(resume, `${filename}.pdf`);
+      }
+    } catch (e) { console.error('PDF export failed:', e); }
     setExporting(null);
   }
 
   async function handleExportPDFLegacy() {
     setExporting('pdf');
     const filename = buildExportFilename(auth?.user, resume);
+    const { exportToPDF } = await import('@/utils/pdfExport');
     await exportToPDF(activeTab === 'coverletter' ? 'cover-letter-preview' : 'resume-preview', `${filename}.pdf`, margin);
     setExporting(null);
   }
@@ -162,7 +167,10 @@ export function Editor({ store, auth, sync }) {
   async function handleExportWord() {
     setExporting('word');
     const filename = buildExportFilename(auth?.user, resume);
-    try { await exportToWord(resume, `${filename}.docx`); } catch (e) { console.error('Word export failed:', e); }
+    try {
+      const { exportToWord } = await import('@/utils/wordExport');
+      await exportToWord(resume, `${filename}.docx`);
+    } catch (e) { console.error('Word export failed:', e); }
     setExporting(null);
   }
 
