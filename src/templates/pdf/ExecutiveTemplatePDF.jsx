@@ -1,5 +1,5 @@
 import { Document, Page, View, Text, Image } from '@react-pdf/renderer';
-import { styles as pageStyles } from './shared/PdfPage';
+import { getPageStyle } from './shared/PdfPage';
 import { PdfContactRow } from './shared/PdfContact';
 import { SectionRouter, getEffectiveSpacing } from './shared/PdfSections';
 import { PdfRichText } from './shared/PdfRichText';
@@ -26,16 +26,16 @@ function getPhotoStyle(settings, accent) {
 
 export function ExecutiveTemplatePDF({ data }) {
   const { personal, sections = [], settings = {} } = data;
-  const vMm           = settings.marginV        ?? 14;
-  const hMm           = settings.marginH        ?? 18;
-  const accent        = settings.accentColor    || '#2563eb';
-  const textColor     = settings.textColor      || '#111111';
-  const nameColor     = settings.nameColor      || textColor;
-  const jobTitleColor = settings.jobTitleColor  || accent;
-  const baseSize      = settings.fontSizeBase   || 11;
+  const {
+    accentColor: accent,
+    fontSizeBase: baseSize,
+    nameColor,
+    jobTitleColor,
+    lineHeightValue: lineH,
+    sectionGap,
+  } = settings;
   const nameSize      = baseSize + (settings.fontSizeNameDelta  ?? 8);
   const entrySize     = baseSize + (settings.fontSizeEntryDelta ?? 0);
-  const lineH         = settings.lineHeightValue || 1.5;
   const hidden        = personal?.hiddenFields  || [];
 
   const headerAlign  = settings.headerAlign || 'left';
@@ -48,83 +48,79 @@ export function ExecutiveTemplatePDF({ data }) {
     : {};
 
   const photoTextAlign = settings.photoTextAlign || 'center';
-  const alignSelfVal = photoTextAlign === 'bottom' ? 'flex-end' : photoTextAlign === 'center' ? 'center' : 'flex-start';
+  const alignItemsVal = photoTextAlign === 'bottom' ? 'flex-end' : photoTextAlign === 'center' ? 'center' : 'flex-start';
+
+  // Name + Title block
+  const nameBlock = headerLayout === 'inline' ? (
+    <View style={{
+      flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline',
+      gap: settings.headerInlineGap ?? 8,
+      justifyContent: centered ? 'center' : 'flex-start',
+    }}>
+      <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor, lineHeight: 1.2 }}>
+        {personal?.name || 'Your Name'}
+      </Text>
+      {personal?.title && (
+        <Text style={{ fontSize: entrySize, color: jobTitleColor, fontWeight: 500, lineHeight: 1.2 }}>
+          {personal.title}
+        </Text>
+      )}
+    </View>
+  ) : (
+    <View>
+      <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor, textAlign: centered ? 'center' : 'left', lineHeight: 1.2 }}>
+        {personal?.name || 'Your Name'}
+      </Text>
+      {personal?.title && (
+        <Text style={{ fontSize: entrySize, color: jobTitleColor, marginTop: 1, textAlign: centered ? 'center' : 'left', lineHeight: 1.2 }}>
+          {personal.title}
+        </Text>
+      )}
+    </View>
+  );
+
+  const pageStyle = getPageStyle(settings);
 
   return (
-    <Document>
-      <Page
-        size="A4"
-        style={[pageStyles.page, {
-          fontFamily:    settings._pdfFontFamily || 'NotoSans',
-          paddingTop:    `${vMm}mm`,
-          paddingBottom: `${vMm}mm`,
-          paddingLeft:   `${hMm}mm`,
-          paddingRight:  `${hMm}mm`,
-          fontSize:      baseSize,
-          lineHeight:    lineH,
-          color:         textColor,
-        }]}
-      >
+    <Document
+      title={personal?.name ? `${personal.name} Resume` : 'Resume'}
+      author={personal?.name || ''}
+      creator="FlowCV"
+      producer="FlowCV"
+    >
+      <Page size="A4" style={pageStyle}>
         {/* Header */}
-        <View style={[{ marginBottom: 14 }, headerBorderStyle]}>
+        <View style={[{ marginBottom: sectionGap }, headerBorderStyle]}>
           <View style={{
             flexDirection: centered ? 'column' : 'row',
-            alignItems: centered ? 'center' : alignSelfVal,
-            gap: 12,
-            marginBottom: 4,
-            width: '100%'
+            alignItems: centered ? 'center' : alignItemsVal,
+            gap: 10,
           }}>
             {personal?.photo && !hidden.includes('photo') && (
               <Image src={personal.photo} style={getPhotoStyle(settings, accent)} />
             )}
-            <View style={{ flex: 1, alignItems: centered ? 'center' : 'stretch', width: '100%' }}>
-              {headerLayout === 'inline' ? (
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', gap: settings.headerInlineGap ?? 8, justifyContent: centered ? 'center' : 'flex-start' }}>
-                  <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor }}>
-                    {personal?.name || 'Your Name'}
-                  </Text>
-                  {personal?.title && (
-                    <Text style={{ fontSize: entrySize, color: jobTitleColor, fontWeight: 'medium' }}>
-                      {personal.title}
-                    </Text>
-                  )}
-                </View>
-              ) : (
-                <>
-                  <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor, marginBottom: 1, textAlign: centered ? 'center' : 'left' }}>
-                    {personal?.name || 'Your Name'}
-                  </Text>
-                  {personal?.title && (
-                    <Text style={{ fontSize: entrySize, color: jobTitleColor, marginBottom: 1, textAlign: centered ? 'center' : 'left' }}>
-                      {personal.title}
-                    </Text>
-                  )}
-                </>
-              )}
+            <View style={centered ? { alignItems: 'center' } : {}}>
+              {nameBlock}
               <PdfContactRow personal={personal} settings={settings} />
             </View>
           </View>
 
           {!hidden.includes('summary') && personal?.summary &&
            personal.summary.replace(/<[^>]*>/g, '').trim() && (
-            <View style={{ marginTop: 8 }}>
+            <View style={{ marginTop: 6 }}>
               <PdfRichText html={personal.summary} style={{ fontSize: baseSize - 0.5, color: '#333333', lineHeight: lineH, textAlign: centered ? 'center' : 'left' }} />
             </View>
           )}
         </View>
 
-        {/* Body sections — italicSubs=true for Executive italic secondary text */}
+        {/* Body sections — italicSubs makes secondary text italic (role, company, org) */}
         {sections.map((section) => {
           if (section.visible === false) return null;
           const { marginBottom, spaceBefore, itemGap } = getEffectiveSpacing(section, settings);
-          // Executive default: titleOrder='role' when section doesn't override it
-          const execSection = section.type === 'experience' && !section.settings?.titleOrder
-            ? { ...section, settings: { ...section.settings, titleOrder: 'role' } }
-            : section;
           return (
             <View key={section.id} style={spaceBefore != null ? { marginTop: spaceBefore } : {}}>
               <SectionRouter
-                section={execSection}
+                section={section}
                 settings={settings}
                 marginBottom={marginBottom}
                 itemGap={itemGap}

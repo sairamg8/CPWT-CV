@@ -1,5 +1,5 @@
 import { Document, Page, View, Text, Image } from '@react-pdf/renderer';
-import { styles as pageStyles } from './shared/PdfPage';
+import { getPageStyle } from './shared/PdfPage';
 import { SectionRouter, getEffectiveSpacing } from './shared/PdfSections';
 import { PdfRichText } from './shared/PdfRichText';
 import { MailIcon, PhoneIcon, MapPinIcon, GlobeIcon, LinkedinPdfIcon, GithubPdfIcon } from './shared/PdfIcons';
@@ -41,11 +41,11 @@ function HeaderContact({ personal, settings, textColor }) {
 
   if (!items.length) return null;
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 12, rowGap: 2, marginTop: 4 }}>
       {items.map(({ key, Icon, display }) => (
         <View key={key} style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
           <Icon size={iconPt} color={textColor} />
-          <Text style={{ fontSize: textSize, color: textColor }}>{display}</Text>
+          <Text style={{ fontSize: textSize, color: textColor, lineHeight: 1.2 }}>{display}</Text>
         </View>
       ))}
     </View>
@@ -54,80 +54,71 @@ function HeaderContact({ personal, settings, textColor }) {
 
 export function ModernTemplatePDF({ data }) {
   const { personal, sections = [], settings = {} } = data;
-  const vMm           = settings.marginV        ?? 14;
-  const hMm           = settings.marginH        ?? 18;
-  const accent        = settings.accentColor    || '#1d4ed8';
-  const textColor     = settings.textColor      || '#1f2937';
-  const headerText    = settings.headerTextColor || '#ffffff';
-  const nameColor     = settings.nameColor      || headerText;
-  const jobTitleColor = settings.jobTitleColor  || headerText;
-  const baseSize      = settings.fontSizeBase   || 11;
+  const {
+    accentColor: accent,
+    fontSizeBase: baseSize,
+    nameColor,
+    jobTitleColor,
+    lineHeightValue: lineH,
+    sectionGap,
+  } = settings;
   const nameSize      = baseSize + (settings.fontSizeNameDelta  ?? 8);
   const entrySize     = baseSize + (settings.fontSizeEntryDelta ?? 0);
-  const lineH         = settings.lineHeightValue || 1.5;
-  const sectionGap    = settings.sectionGap     ?? 16;
   const hidden        = personal?.hiddenFields  || [];
 
+  const pageStyle = getPageStyle(settings);
+
   return (
-    <Document>
-      <Page
-        size="A4"
-        style={[pageStyles.page, {
-          fontFamily:    settings._pdfFontFamily || 'NotoSans',
-          paddingTop:    0,
-          paddingBottom: `${vMm}mm`,
-          paddingLeft:   0,
-          paddingRight:  0,
-          fontSize:      baseSize,
-          lineHeight:    lineH,
-          color:         textColor,
-        }]}
-      >
-        {/* Colored header band */}
+    <Document
+      title={personal?.name ? `${personal.name} Resume` : 'Resume'}
+      author={personal?.name || ''}
+      creator="FlowCV"
+      producer="FlowCV"
+    >
+      <Page size="A4" style={pageStyle}>
+        {/* Colored header band (rendered as a card inside page margins, matching HTML px-6 py-5 rounded-sm) */}
         <View style={{
           backgroundColor: accent,
-          paddingTop:      `${vMm}mm`,
-          paddingBottom:   14,
-          paddingLeft:     `${hMm}mm`,
-          paddingRight:    `${hMm}mm`,
-          marginBottom:    sectionGap,
+          borderRadius: 3,
+          paddingTop: 14,
+          paddingBottom: 14,
+          paddingHorizontal: 16,
+          marginBottom: sectionGap,
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
             {personal?.photo && !hidden.includes('photo') && (
               <Image src={personal.photo} style={getPhotoStyle(settings, '#ffffff')} />
             )}
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor, marginBottom: 1 }}>
+              <Text style={{ fontSize: nameSize, fontWeight: 'bold', color: nameColor, marginBottom: 1, lineHeight: 1.2 }}>
                 {personal?.name}
               </Text>
               {personal?.title && (
-                <Text style={{ fontSize: entrySize, color: jobTitleColor, marginBottom: 2 }}>
+                <Text style={{ fontSize: entrySize, color: jobTitleColor, marginBottom: 2, lineHeight: 1.2 }}>
                   {personal.title}
                 </Text>
               )}
-              <HeaderContact personal={personal} settings={settings} textColor={headerText} />
+              <HeaderContact personal={personal} settings={settings} textColor={settings.headerTextColor || '#ffffff'} />
             </View>
           </View>
           {!hidden.includes('summary') && personal?.summary &&
            personal.summary.replace(/<[^>]*>/g, '').trim() && (
             <View style={{ marginTop: 8 }}>
-              <PdfRichText html={personal.summary} style={{ fontSize: baseSize - 0.5, color: headerText, lineHeight: lineH }} />
+              <PdfRichText html={personal.summary} style={{ fontSize: baseSize - 0.5, color: settings.headerTextColor || '#ffffff', lineHeight: lineH }} />
             </View>
           )}
         </View>
 
         {/* Body sections */}
-        <View style={{ paddingLeft: `${hMm}mm`, paddingRight: `${hMm}mm` }}>
-          {sections.map((section) => {
-            if (section.visible === false) return null;
-            const { marginBottom, spaceBefore, itemGap } = getEffectiveSpacing(section, settings);
-            return (
-              <View key={section.id} style={spaceBefore != null ? { marginTop: spaceBefore } : {}}>
-                <SectionRouter section={section} settings={settings} marginBottom={marginBottom} itemGap={itemGap} />
-              </View>
-            );
-          })}
-        </View>
+        {sections.map((section) => {
+          if (section.visible === false) return null;
+          const { marginBottom, spaceBefore, itemGap } = getEffectiveSpacing(section, settings);
+          return (
+            <View key={section.id} style={spaceBefore != null ? { marginTop: spaceBefore } : {}}>
+              <SectionRouter section={section} settings={settings} marginBottom={marginBottom} itemGap={itemGap} />
+            </View>
+          );
+        })}
       </Page>
     </Document>
   );

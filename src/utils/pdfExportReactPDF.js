@@ -2,6 +2,9 @@ import React from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { registerPdfFont } from '@/templates/pdf/shared/pdfFontLoader';
 
+import { resolveTemplateSettings } from '@/templates/pdf/shared/PdfPage';
+import { resolveSection } from '@/templates/pdf/shared/templateSectionDefaults';
+
 const LOADERS = {
   classic:   () => import('@/templates/pdf/ClassicTemplatePDF').then(m => m.ClassicTemplatePDF),
   modern:    () => import('@/templates/pdf/ModernTemplatePDF').then(m => m.ModernTemplatePDF),
@@ -20,10 +23,22 @@ export async function exportToPDFReact(resume, filename = 'resume.pdf') {
 
   const [TemplatePDF] = await Promise.all([load()]);
 
-  // Inject resolved font family into settings so the template Page can apply it.
+  // Inject resolved font family and template-specific defaults into settings
+  const resolvedSettings = resolveTemplateSettings({
+    ...resume?.settings,
+    _pdfFontFamily: fontFamily,
+    _template: key,
+  }, key);
+
+  // Resolve each section: merge template defaults with user-stored settings.
+  // User customizations always win; un-customized settings use the template default
+  // so the PDF matches what the canvas shows by default for this template.
+  const resolvedSections = (resume?.sections || []).map(s => resolveSection(s, key));
+
   const data = {
     ...resume,
-    settings: { ...resume?.settings, _pdfFontFamily: fontFamily },
+    sections: resolvedSections,
+    settings: resolvedSettings,
   };
 
   const element = React.createElement(TemplatePDF, { data });

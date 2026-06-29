@@ -46,7 +46,7 @@ export function PdfContactRow({ personal, settings, color }) {
 
   if (contactLayout === 'single') {
     return (
-      <View style={{ width: '100%', marginTop: 3, gap: 2 }}>
+      <View style={{ marginTop: 3, gap: 2 }}>
         {items.map(item => <View key={item.key}>{renderItem(item)}</View>)}
       </View>
     );
@@ -54,7 +54,7 @@ export function PdfContactRow({ personal, settings, color }) {
 
   if (contactLayout === '2grid') {
     return (
-      <View style={{ width: '100%', marginTop: 3, flexDirection: 'row', flexWrap: 'wrap' }}>
+      <View style={{ marginTop: 3, flexDirection: 'row', flexWrap: 'wrap' }}>
         {items.map(item => (
           <View key={item.key} style={{ width: '50%', paddingBottom: 1 }}>{renderItem(item)}</View>
         ))}
@@ -63,31 +63,32 @@ export function PdfContactRow({ personal, settings, color }) {
   }
 
   // justify (default) - wrap row
+  // HTML canvas: gap: '2px 16px' — 2px row gap, 16px column gap
   if (contactStyle === 'icon') {
     return (
-      <View style={{ width: '100%', marginTop: 3, flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+      <View style={{ marginTop: 3, flexDirection: 'row', flexWrap: 'wrap', columnGap: 12, rowGap: 2 }}>
         {items.map(renderItem)}
       </View>
     );
   }
   if (contactStyle === 'bullet') {
     return (
-      <View style={{ width: '100%', marginTop: 3, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}>
+      <View style={{ marginTop: 3, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}>
         {items.map((item, i) => (
           <View key={item.key} style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {i > 0 && <Text style={{ color: '#bbbbbb', marginHorizontal: 6, fontSize: textSize }}>•</Text>}
+            {i > 0 && <Text style={{ color: '#bbbbbb', marginHorizontal: 5, fontSize: textSize }}>•</Text>}
             <Text style={{ fontSize: textSize, color: c }}>{item.display}</Text>
           </View>
         ))}
       </View>
     );
   }
-  // bar (plain) | separator
+  // bar (plain) | separator — HTML canvas: mx-1.5 = 6px
   return (
-    <View style={{ width: '100%', marginTop: 3, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}>
+    <View style={{ marginTop: 3, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}>
       {items.map((item, i) => (
         <View key={item.key} style={{ flexDirection: 'row', alignItems: 'center' }}>
-          {i > 0 && <Text style={{ color: '#cccccc', marginHorizontal: 6, fontSize: textSize }}>|</Text>}
+          {i > 0 && <Text style={{ color: '#cccccc', marginHorizontal: 5, fontSize: textSize }}>|</Text>}
           <Text style={{ fontSize: textSize, color: c }}>{item.display}</Text>
         </View>
       ))}
