@@ -67,7 +67,7 @@ export function SidebarTemplatePDF({ data }) {
 
   const sideIconPt = Math.max(7, Math.round((settings?.iconSize ?? 11) * 0.72));
   const sideSectionGap = Math.round(sectionGap);
-  const sideItemGap    = Math.round(itemGap * 0.8);
+  const sideItemGap    = Math.round(itemGap);
 
   const contactItems = [
     { key: 'email',    Icon: MailIcon,        label: 'Email',    val: personal?.email,    display: personal?.email },
@@ -106,8 +106,8 @@ export function SidebarTemplatePDF({ data }) {
           backgroundColor: 'transparent',
           paddingTop:    `${vMm}mm`,
           paddingBottom: `${vMm}mm`,
-          paddingLeft:   12,
-          paddingRight:  12,
+          paddingLeft:   `${hMm}mm`,
+          paddingRight:  10,
           color:         '#e2e8f0',
         }}>
           {/* Name + title */}
@@ -147,8 +147,8 @@ export function SidebarTemplatePDF({ data }) {
           {/* Sidebar sections */}
           {sidebarSections.map(section => {
             const ss = section.settings || {};
-            const effGap = ss.spaceAfter ?? sideSectionGap;
-            const effItemGap = ss.itemGap ?? sideItemGap;
+            const effGap     = ss.spaceAfter != null ? Math.round(ss.spaceAfter * 0.75) : sideSectionGap;
+            const effItemGap = ss.itemGap    != null ? Math.round(ss.itemGap    * 0.75) : sideItemGap;
             return (
               <View key={section.id} style={ss.spaceBefore != null ? { marginTop: ss.spaceBefore } : {}}>
                 {renderSideSection(section, effGap, effItemGap, accent)}

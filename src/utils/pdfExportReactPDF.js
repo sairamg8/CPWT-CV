@@ -13,37 +13,7 @@ const LOADERS = {
   executive: () => import('@/templates/pdf/ExecutiveTemplatePDF').then(m => m.ExecutiveTemplatePDF),
 };
 
-export async function exportToPDFReact(resume, filename = 'resume.pdf') {
-  const key = resume?.template || 'classic';
-  const load = LOADERS[key] || LOADERS.classic;
-
-  // Register the user's chosen font with react-pdf, get back the family name.
-  // For unknown/custom fonts, react-pdf silently falls back to Helvetica if the CDN file 404s.
-  const fontFamily = registerPdfFont(resume?.settings);
-
-  const [TemplatePDF] = await Promise.all([load()]);
-
-  // Inject resolved font family and template-specific defaults into settings
-  const resolvedSettings = resolveTemplateSettings({
-    ...resume?.settings,
-    _pdfFontFamily: fontFamily,
-    _template: key,
-  }, key);
-
-  // Resolve each section: merge template defaults with user-stored settings.
-  // User customizations always win; un-customized settings use the template default
-  // so the PDF matches what the canvas shows by default for this template.
-  const resolvedSections = (resume?.sections || []).map(s => resolveSection(s, key));
-
-  const data = {
-    ...resume,
-    sections: resolvedSections,
-    settings: resolvedSettings,
-  };
-
-  const element = React.createElement(TemplatePDF, { data });
-  const blob = await pdf(element).toBlob();
-
+function triggerDownload(blob, filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -52,4 +22,41 @@ export async function exportToPDFReact(resume, filename = 'resume.pdf') {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+export async function exportToPDFReact(resume, filename = 'resume.pdf') {
+  const key = resume?.template || 'classic';
+  const load = LOADERS[key] || LOADERS.classic;
+
+  // Register the user's chosen font with react-pdf, get back the family name.
+  const fontFamily = registerPdfFont(resume?.settings);
+
+  const TemplatePDF = await load();
+
+  const resolvedSettings = resolveTemplateSettings({
+    ...resume?.settings,
+    _pdfFontFamily: fontFamily,
+    _template: key,
+  }, key);
+
+  const resolvedSections = (resume?.sections || []).map(s => resolveSection(s, key));
+
+  const data = { ...resume, sections: resolvedSections, settings: resolvedSettings };
+  const blob = await pdf(React.createElement(TemplatePDF, { data })).toBlob();
+  triggerDownload(blob, filename);
+}
+
+export async function exportCoverLetterPDFReact(resume, filename = 'cover-letter.pdf') {
+  const { CoverLetterTemplatePDF } = await import('@/templates/pdf/CoverLetterTemplatePDF');
+  const fontFamily = registerPdfFont(resume?.settings);
+
+  const resolvedSettings = resolveTemplateSettings({
+    ...resume?.settings,
+    _pdfFontFamily: fontFamily,
+    _template: resume?.template || 'classic',
+  }, resume?.template || 'classic');
+
+  const data = { ...resume, settings: resolvedSettings };
+  const blob = await pdf(React.createElement(CoverLetterTemplatePDF, { data })).toBlob();
+  triggerDownload(blob, filename);
 }
